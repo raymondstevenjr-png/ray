@@ -1,90 +1,100 @@
 import React from 'react';
-import { useCurrentFrame, interpolate } from 'remotion';
+import { interpolate } from 'remotion';
 
 const cl = (v: number) => Math.max(0, Math.min(1, v));
 
-// ── Simplified Sierra Leone outline (560×540 viewBox) ───────────────────────
+// ── Real Sierra Leone outline (560×540 viewBox) ─────────────────────────────
+// Coordinate mapping from actual lat/lon:
+//   x = 40 + (13.3 − lonW) / 3.0 × 480
+//   y = 525 − (latN  − 6.9) / 3.1 × 495
+//
+// Key points: NW(74,53) N-peak(206,30) NE(517,189) SE(408,517)
+// Freetown Peninsula rendered as a cubic-bezier notch on the west coast.
 const OUTLINE_PATH =
-  'M 100,12 L 268,5 L 430,52 L 522,158 L 514,290 L 476,402 L 418,490 L 304,528 L 172,514 L 76,448 L 44,382 L 36,330 L 48,268 L 56,215 L 70,155 L 86,85 Z';
+  'M 74,53 ' +
+  'L 133,48 L 206,30 L 291,42 L 363,74 ' +
+  'L 451,141 L 517,189 ' +
+  'L 523,253 L 496,349 L 469,429 ' +
+  'L 408,517 L 336,515 L 278,496 L 224,464 ' +
+  'L 168,432 L 123,373 L 96,317 ' +
+  'C 80,307 58,300 44,286 C 39,270 42,253 56,246 ' +
+  'L 70,242 L 70,208 L 70,168 L 70,128 L 72,88 L 74,53 Z';
 
-// Freetown peninsula appendage
-const PENINSULA_PATH =
-  'M 44,338 C 28,330 8,342 2,360 C -2,378 10,395 26,398 C 38,400 46,390 46,374 Z';
-
-// Internal province division lines (simplified)
+// Province boundary lines
 const PROVINCE_DIVIDERS = [
-  'M 268,5 C 272,175 272,360 262,528',   // rough N-S spine
-  'M 44,295 C 180,290 360,286 514,290',  // rough E-W mid
+  'M 291,42  C 295,165 303,330 298,518',         // N–S spine (west/east provinces)
+  'M 70,264  C 175,258 335,262 475,270',          // E–W mid (north/south provinces)
+  'M 56,246  C 64,234 84,228 108,232 L 132,238',  // Western Area pocket
 ];
 
-// Key cities
-const CITIES: { x: number; y: number; label: string; capital?: boolean }[] = [
-  { x: 30,  y: 365, label: 'Freetown', capital: true },
-  { x: 248, y: 390, label: 'Bo' },
-  { x: 378, y: 335, label: 'Kenema' },
-  { x: 215, y: 168, label: 'Makeni' },
-  { x: 408, y: 210, label: 'Koidu' },
+// Major rivers (Rokel, Moa, Jong) — faint decorative lines
+const RIVERS: { d: string; width: number }[] = [
+  { d: 'M 272,250 C 232,252 182,252 135,250 C 100,249 72,247 58,246', width: 1.8 },
+  { d: 'M 415,242 C 410,290 402,356 382,416 C 368,462 350,500 336,515', width: 1.4 },
+  { d: 'M 305,263 C 282,308 260,365 248,418 C 240,455 258,488 278,496', width: 1.4 },
 ];
 
-// Province label positions
+const CITIES: {
+  x: number; y: number; label: string;
+  capital?: boolean; lx?: number; ly?: number;
+}[] = [
+  { x: 52,  y: 250, label: 'Freetown', capital: true, lx: 14, ly:  4 },
+  { x: 289, y: 355, label: 'Bo',                      lx:  9, ly:  4 },
+  { x: 377, y: 368, label: 'Kenema',                  lx:  9, ly:  4 },
+  { x: 241, y: 208, label: 'Makeni',                  lx:  9, ly: -7 },
+  { x: 412, y: 247, label: 'Koidu',                   lx:  9, ly:  4 },
+];
+
 const PROVINCES: { x: number; y: number; label: string }[] = [
-  { x: 160, y: 140, label: 'Northern' },
-  { x: 370, y: 155, label: 'Eastern' },
-  { x: 165, y: 415, label: 'Southern' },
-  { x: 55,  y: 300, label: 'Western' },
+  { x: 178, y: 148, label: 'Northern' },
+  { x: 408, y: 192, label: 'Eastern'  },
+  { x: 192, y: 385, label: 'Southern' },
+  { x: 86,  y: 263, label: 'Western'  },
 ];
 
-// Coverage dot positions (representative sampling)
 const COVERAGE_DOTS: { x: number; y: number }[] = [
-  { x: 110, y: 100 }, { x: 200, y: 80 },  { x: 300, y: 70 },
-  { x: 400, y: 110 }, { x: 460, y: 190 }, { x: 450, y: 270 },
-  { x: 380, y: 360 }, { x: 280, y: 420 }, { x: 180, y: 440 },
-  { x: 90,  y: 390 }, { x: 70,  y: 310 }, { x: 120, y: 240 },
-  { x: 220, y: 200 }, { x: 320, y: 210 }, { x: 340, y: 140 },
-  { x: 180, y: 310 }, { x: 260, y: 290 }, { x: 410, y: 300 },
+  { x: 110, y: 100 }, { x: 195, y: 75  }, { x: 285, y: 60  },
+  { x: 375, y: 90  }, { x: 445, y: 160 }, { x: 500, y: 228 },
+  { x: 488, y: 308 }, { x: 460, y: 390 }, { x: 388, y: 448 },
+  { x: 310, y: 478 }, { x: 230, y: 458 }, { x: 152, y: 415 },
+  { x: 100, y: 358 }, { x: 83,  y: 290 }, { x: 122, y: 220 },
+  { x: 216, y: 172 }, { x: 314, y: 175 }, { x: 398, y: 200 },
 ];
 
 export interface SierraLeoneMapProps {
-  /** 0–1: how far the outline has drawn on */
   drawProgress?: number;
-  /** show province labels */
   showLabels?: boolean;
-  /** show city dots */
   showCities?: boolean;
-  /** show 'signal / coverage' dots */
   showCoverage?: boolean;
-  /** 0 = full-country, 1 = zoomed in toward Freetown/Western Area */
   zoom?: number;
-  /** 0–1 opacity for a sketch circle around the whole country */
   circleProgress?: number;
-  /** tint colour for the map fill */
   fillColor?: string;
   strokeColor?: string;
-  /** draw province division lines */
   showDividers?: boolean;
+  showRivers?: boolean;
 }
 
 export const SierraLeoneMap: React.FC<SierraLeoneMapProps> = ({
   drawProgress = 1,
-  showLabels = false,
-  showCities = false,
+  showLabels   = false,
+  showCities   = false,
   showCoverage = false,
-  zoom = 0,
+  zoom         = 0,
   circleProgress = 0,
-  fillColor = '#1E3A5F',
-  strokeColor = '#E8E4DC',
+  fillColor    = '#1E3A5F',
+  strokeColor  = '#E8E4DC',
   showDividers = false,
+  showRivers   = false,
 }) => {
-  const TOTAL_PATH = 1750; // estimated path length px
+  const TOTAL_PATH = 2800;
   const dashOffset = interpolate(drawProgress, [0, 1], [TOTAL_PATH, 0]);
 
-  // Zoom transform: translate toward Freetown (30, 365)
-  const scale = interpolate(zoom, [0, 1], [1, 1.7]);
-  const tx    = interpolate(zoom, [0, 1], [0, -40]);
-  const ty    = interpolate(zoom, [0, 1], [0, -100]);
+  // Zoom toward the Freetown / Western Area region
+  const scale = interpolate(zoom, [0, 1], [1.0, 1.65]);
+  const tx    = interpolate(zoom, [0, 1], [0, -30]);
+  const ty    = interpolate(zoom, [0, 1], [0, -25]);
 
-  // Sketch circle around whole country
-  const CIRCLE_LEN = 1320;
+  const CIRCLE_LEN = 1760;
   const circleDash = interpolate(circleProgress, [0, 1], [CIRCLE_LEN, 0]);
 
   return (
@@ -95,19 +105,27 @@ export const SierraLeoneMap: React.FC<SierraLeoneMapProps> = ({
     >
       <g transform={`translate(${280 + tx}, ${270 + ty}) scale(${scale}) translate(-280,-270)`}>
 
-        {/* Country fill (drawn before stroke) */}
-        <path d={OUTLINE_PATH} fill={fillColor} opacity="0.85" />
-        <path d={PENINSULA_PATH} fill={fillColor} opacity="0.85" />
+        {/* Country fill */}
+        <path d={OUTLINE_PATH} fill={fillColor} opacity="0.82" />
+
+        {/* Rivers */}
+        {showRivers && RIVERS.map((r, i) => (
+          <path key={i} d={r.d}
+            fill="none" stroke="#3A8ABB" strokeWidth={r.width}
+            strokeLinecap="round"
+            opacity={0.38 * cl((drawProgress - 0.4) / 0.4)}
+          />
+        ))}
 
         {/* Province dividers */}
         {showDividers && PROVINCE_DIVIDERS.map((d, i) => (
           <path key={i} d={d}
             fill="none" stroke={strokeColor} strokeWidth="1"
-            strokeDasharray="6,5" opacity="0.3"
+            strokeDasharray="6,5" opacity="0.28"
           />
         ))}
 
-        {/* Main outline draw-on */}
+        {/* Outline draw-on animation */}
         <path
           d={OUTLINE_PATH}
           fill="none"
@@ -118,37 +136,29 @@ export const SierraLeoneMap: React.FC<SierraLeoneMapProps> = ({
           strokeDasharray={TOTAL_PATH}
           strokeDashoffset={dashOffset}
         />
-        <path
-          d={PENINSULA_PATH}
-          fill="none"
-          stroke={strokeColor}
-          strokeWidth="2"
-          strokeLinecap="round"
-          opacity={drawProgress}
-        />
 
-        {/* Coverage dots */}
+        {/* Mobile coverage signal dots */}
         {showCoverage && COVERAGE_DOTS.map((dot, i) => {
           const delay = i / COVERAGE_DOTS.length;
-          const localProg = cl((drawProgress - delay * 0.5) / 0.5);
+          const p     = cl((drawProgress - delay * 0.5) / 0.5);
           return (
-            <g key={i} opacity={localProg}>
-              <circle cx={dot.x} cy={dot.y} r="12" fill="#3A9AD9" opacity="0.15" />
-              <circle cx={dot.x} cy={dot.y} r="5" fill="#3A9AD9" opacity="0.6" />
+            <g key={i} opacity={p}>
+              <circle cx={dot.x} cy={dot.y} r="13" fill="#3A9AD9" opacity="0.13" />
+              <circle cx={dot.x} cy={dot.y} r="5"  fill="#3A9AD9" opacity="0.55" />
             </g>
           );
         })}
 
-        {/* City dots */}
+        {/* City markers */}
         {showCities && CITIES.map((c, i) => (
           <g key={i} opacity={cl((drawProgress - 0.6) / 0.4)}>
             {c.capital ? (
               <>
-                <circle cx={c.x} cy={c.y} r="10" fill="#F4D03F" opacity="0.25" />
-                <circle cx={c.x} cy={c.y} r="5"  fill="#F4D03F" />
+                <circle cx={c.x} cy={c.y} r="11" fill="#F4D03F" opacity="0.22" />
+                <circle cx={c.x} cy={c.y} r="5.5" fill="#F4D03F" />
               </>
             ) : (
-              <circle cx={c.x} cy={c.y} r="4" fill="#F4D03F" opacity="0.8" />
+              <circle cx={c.x} cy={c.y} r="4" fill="#F4D03F" opacity="0.78" />
             )}
           </g>
         ))}
@@ -157,8 +167,7 @@ export const SierraLeoneMap: React.FC<SierraLeoneMapProps> = ({
         {showCities && CITIES.map((c, i) => (
           <text
             key={i}
-            x={c.x + (c.capital ? 14 : 10)}
-            y={c.y + 4}
+            x={c.x + (c.lx ?? 10)} y={c.y + (c.ly ?? 4)}
             fill={c.capital ? '#F4D03F' : '#E8E4DC'}
             fontSize={c.capital ? 13 : 11}
             fontFamily="Inter, sans-serif"
@@ -179,26 +188,25 @@ export const SierraLeoneMap: React.FC<SierraLeoneMapProps> = ({
             fontSize="11"
             fontFamily="Inter, sans-serif"
             letterSpacing="2"
-            textDecoration="none"
-            opacity={0.4 * cl((drawProgress - 0.5) / 0.4)}
+            opacity={0.38 * cl((drawProgress - 0.5) / 0.4)}
             style={{ textTransform: 'uppercase' } as React.CSSProperties}
           >
             {p.label.toUpperCase()}
           </text>
         ))}
 
-        {/* Sketch circle (hand-drawn feel via dashed stroke) */}
+        {/* Sketch annotation circle around whole country */}
         {circleProgress > 0 && (
           <ellipse
-            cx="268" cy="272" rx="300" ry="290"
+            cx="295" cy="280" rx="272" ry="268"
             fill="none"
             stroke="#C0392B"
             strokeWidth="3"
             strokeDasharray={CIRCLE_LEN}
             strokeDashoffset={circleDash}
             strokeLinecap="round"
-            transform="rotate(-8, 268, 272)"
-            opacity="0.85"
+            transform="rotate(-6, 295, 280)"
+            opacity="0.82"
           />
         )}
       </g>

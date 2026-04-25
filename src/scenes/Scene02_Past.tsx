@@ -7,9 +7,10 @@
  */
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
-import { SierraLeoneMap } from '../components/SierraLeoneMap';
-import { LowerThird } from '../components/LowerThird';
-import { HandDrawnCircle } from '../components/HandDrawnCircle';
+import { SierraLeoneMap }     from '../components/SierraLeoneMap';
+import { LowerThird }         from '../components/LowerThird';
+import { HandDrawnCircle }    from '../components/HandDrawnCircle';
+import { MonologueCaption }   from '../components/MonologueCaption';
 
 const cl = (v: number) => Math.max(0, Math.min(1, v));
 
@@ -229,9 +230,9 @@ export const Scene02_Past: React.FC = () => {
           />
         </div>
 
-        {/* Freetown circle annotation */}
+        {/* Freetown circle annotation (Freetown at SVG 52,250 → scene ~732,509) */}
         {frame > 60 && (
-          <div style={{ position: 'absolute', left: 488, top: 423 }}>
+          <div style={{ position: 'absolute', left: 690, top: 467 }}>
             <HandDrawnCircle
               cx={42} cy={42} r={38}
               color="#C0392B"
@@ -243,7 +244,7 @@ export const Scene02_Past: React.FC = () => {
 
         {/* "2010" year label callout */}
         <div style={{
-          position: 'absolute', left: 830, top: 440,
+          position: 'absolute', left: 860, top: 478,
           opacity: yearFade,
           fontFamily: '"Caveat", cursive',
           fontSize: 28, color: '#C0392B',
@@ -251,11 +252,11 @@ export const Scene02_Past: React.FC = () => {
           ← 2010
         </div>
 
-        {/* Dotted arrow from label to peninsula area */}
+        {/* Dotted arrow from label to Freetown area */}
         <svg style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
           width="1920" height="1080" viewBox="0 0 1920 1080">
           <line
-            x1="830" y1="460" x2="570" y2="460"
+            x1="858" y1="496" x2="740" y2="496"
             stroke="#C0392B" strokeWidth="1.5"
             strokeDasharray="6,5"
             opacity={dotProg}
@@ -374,6 +375,19 @@ export const Scene02_Past: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Aminata's internal monologue — standing in the queue */}
+        <MonologueCaption
+          words={[
+            'Two', 'hours', 'in', 'this', 'queue...', 'I', 'only',
+            'want', 'to', 'send', 'money', 'to', 'my', 'sister',
+            'in', 'Bo.', 'Na', 'why', 'this', 'so', 'hard?',
+          ]}
+          startFrame={165}
+          endFrame={390}
+          framesPerWord={10}
+          accentColor="#D4B880"
+        />
 
         {/* Lower-third label */}
         <LowerThird

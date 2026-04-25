@@ -10,9 +10,10 @@ import React from 'react';
 import {
   AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig,
 } from 'remotion';
-import { ATMMachine }     from '../components/ATMMachine';
-import { LowerThird }     from '../components/LowerThird';
+import { ATMMachine }         from '../components/ATMMachine';
+import { LowerThird }         from '../components/LowerThird';
 import { HandDrawnUnderline } from '../components/HandDrawnUnderline';
+import { MonologueCaption }   from '../components/MonologueCaption';
 
 const cl = (v: number) => Math.max(0, Math.min(1, v));
 
@@ -417,6 +418,20 @@ export const Scene04_Future: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Aminata's inner voice — ATM success moment */}
+      <MonologueCaption
+        words={[
+          'Three', 'days', 'training.', 'Now', 'I', 'know', 'every',
+          'step.', 'Card', 'in—', 'choose', 'language—', 'Krio.',
+          'Select', 'amount.', 'Done.', 'Five', 'minutes.', 'My',
+          'sister', 'get', 'the', 'money.',
+        ]}
+        startFrame={295}
+        endFrame={505}
+        framesPerWord={9}
+        accentColor="#4CAF50"
+      />
 
       <LowerThird
         label="The Future · Sierra Leone"

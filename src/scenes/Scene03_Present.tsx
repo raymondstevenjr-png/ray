@@ -13,10 +13,11 @@ import React from 'react';
 import {
   AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig,
 } from 'remotion';
-import { SierraLeoneMap } from '../components/SierraLeoneMap';
-import { ATMMachine }     from '../components/ATMMachine';
-import { LowerThird }     from '../components/LowerThird';
-import { HandDrawnCircle } from '../components/HandDrawnCircle';
+import { SierraLeoneMap }   from '../components/SierraLeoneMap';
+import { ATMMachine }       from '../components/ATMMachine';
+import { LowerThird }       from '../components/LowerThird';
+import { HandDrawnCircle }  from '../components/HandDrawnCircle';
+import { MonologueCaption } from '../components/MonologueCaption';
 
 const cl = (v: number) => Math.max(0, Math.min(1, v));
 
@@ -237,9 +238,9 @@ export const Scene03_Present: React.FC = () => {
           />
         </div>
 
-        {/* Circle annotation on Freetown */}
+        {/* Circle annotation on Freetown (SVG 52,250 → scene ~732,509) */}
         {frame > 60 && (
-          <div style={{ position: 'absolute', left: 488, top: 423 }}>
+          <div style={{ position: 'absolute', left: 690, top: 467 }}>
             <HandDrawnCircle cx={42} cy={42} r={38} color="#F4D03F"
               startFrame={60} drawDuration={40} />
           </div>
@@ -489,6 +490,20 @@ export const Scene03_Present: React.FC = () => {
             );
           })}
         </AbsoluteFill>
+
+        {/* Aminata's internal monologue — hesitating at the ATM */}
+        <MonologueCaption
+          words={[
+            'The', 'machine', 'dae', 'here.', 'The', '4G', 'dae.',
+            'But...', 'suppose', 'I', 'press', 'wrong', 'button?',
+            'What', 'if', 'machine', 'chop', 'my', 'money?',
+            'I', 'no', 'trust', 'am', 'yet.',
+          ]}
+          startFrame={240}
+          endFrame={460}
+          framesPerWord={9}
+          accentColor="#F4D03F"
+        />
 
         <LowerThird
           label="Today · Sierra Leone"
