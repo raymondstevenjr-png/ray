@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Sequence } from 'remotion';
+import { AbsoluteFill, Sequence, Audio, staticFile } from 'remotion';
 
 import { LocalFontLoader } from './components/LocalFontLoader';
 import { GrainOverlay }    from './components/GrainOverlay';
@@ -50,6 +50,9 @@ export const DebateIntro_Group2: React.FC = () => {
       <Sequence from={S.S5.from} durationInFrames={S.S5.dur}>
         <Scene05_Closing />
       </Sequence>
+
+      {/* Subtle ambient drone — very low volume throughout */}
+      <Audio src={staticFile('audio/ambient_drone.mp3')} volume={0.10} />
 
       <GrainOverlay opacity={0.055} />
       <LocalFontLoader />

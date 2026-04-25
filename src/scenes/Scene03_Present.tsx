@@ -12,6 +12,7 @@
 import React from 'react';
 import {
   AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig,
+  Sequence, Audio, staticFile,
 } from 'remotion';
 import { SierraLeoneMap }   from '../components/SierraLeoneMap';
 import { ATMMachine }       from '../components/ATMMachine';
@@ -238,9 +239,9 @@ export const Scene03_Present: React.FC = () => {
           />
         </div>
 
-        {/* Circle annotation on Freetown (SVG 52,250 → scene ~732,509) */}
+        {/* Circle annotation on Freetown (real map: SVG 63,275 → scene ~743,534) */}
         {frame > 60 && (
-          <div style={{ position: 'absolute', left: 690, top: 467 }}>
+          <div style={{ position: 'absolute', left: 701, top: 492 }}>
             <HandDrawnCircle cx={42} cy={42} r={38} color="#F4D03F"
               startFrame={60} drawDuration={40} />
           </div>
@@ -490,6 +491,11 @@ export const Scene03_Present: React.FC = () => {
             );
           })}
         </AbsoluteFill>
+
+        {/* Aminata's voice — hesitation at ATM */}
+        <Sequence from={240} durationInFrames={352}>
+          <Audio src={staticFile('audio/aminata_present.mp3')} volume={0.90} />
+        </Sequence>
 
         {/* Aminata's internal monologue — hesitating at the ATM */}
         <MonologueCaption

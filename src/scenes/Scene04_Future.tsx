@@ -9,6 +9,7 @@
 import React from 'react';
 import {
   AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig,
+  Sequence, Audio, staticFile,
 } from 'remotion';
 import { ATMMachine }         from '../components/ATMMachine';
 import { LowerThird }         from '../components/LowerThird';
@@ -418,6 +419,11 @@ export const Scene04_Future: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Aminata's voice — confident ATM success */}
+      <Sequence from={295} durationInFrames={344}>
+        <Audio src={staticFile('audio/aminata_future.mp3')} volume={0.90} />
+      </Sequence>
 
       {/* Aminata's inner voice — ATM success moment */}
       <MonologueCaption
