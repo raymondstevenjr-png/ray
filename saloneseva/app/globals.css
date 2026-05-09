@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-green: #1a5c2e;
+  --brand-gold: #c9952a;
+}
+
+@layer base {
+  body {
+    @apply text-gray-900 bg-white;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-white font-semibold rounded-lg transition-all duration-200;
+    background-color: var(--brand-green);
+  }
+  .btn-primary:hover {
+    background-color: #246b38;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg transition-all duration-200;
+    background-color: var(--brand-gold);
+    color: white;
+  }
+  .btn-gold:hover {
+    background-color: #a8791f;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 font-semibold rounded-lg border-2 transition-all duration-200;
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+  }
+  .btn-outline:hover {
+    background-color: var(--brand-green);
+    color: white;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+
+  .section-heading {
+    @apply text-3xl md:text-4xl font-bold text-gray-900 text-center;
+  }
+
+  .section-subheading {
+    @apply text-lg text-gray-600 text-center max-w-2xl mx-auto mt-4;
+  }
+}
