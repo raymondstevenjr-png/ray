@@ -71,8 +71,11 @@ const US_PROVIDERS: Provider[] = [
   },
   {
     name: "Ria",
-    fee: "$2.99",
-    feeCalc: () => 2.99,
+    // Ria Money Transfer fees verified May 2026
+    // Cash pickup: $5.00 | Bank deposit: $3.00 | Mobile: $0.99
+    // Verify current fees at: riamoneytransfer.com
+    fee: "$5.00",
+    feeCalc: () => 5.00,
     rate: 22.13,
     delivery: "Minutes",
     method: "Cash Pickup",
@@ -80,6 +83,7 @@ const US_PROVIDERS: Provider[] = [
     reviews: 6700,
     affiliate:
       "https://www.riamoneytransfer.com/?utm_source=remitsl&utm_medium=affiliate&utm_campaign=sierra-leone-comparison",
+    feeNote: "Cash pickup $5.00 · Bank deposit $3.00 · Mobile $0.99",
   },
   {
     name: "Western Union",

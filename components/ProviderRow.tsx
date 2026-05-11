@@ -70,7 +70,20 @@ export default function ProviderRow({ result, currencySymbol }: ProviderRowProps
 
       {/* Fee */}
       <td className="py-4 px-3 text-sm text-gray-600 whitespace-nowrap">
-        {result.fee}
+        <div className="flex items-center gap-1">
+          <span>{result.fee}</span>
+          {result.feeNote && (
+            <div className="relative group">
+              <svg className="w-3.5 h-3.5 text-gray-400 cursor-help flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 hidden group-hover:block w-56 bg-navy text-white text-xs rounded-lg px-3 py-2 shadow-xl pointer-events-none">
+                {result.feeNote}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy" />
+              </div>
+            </div>
+          )}
+        </div>
         {result.feeAmount > 0 && (
           <div className="text-xs text-gray-400">
             = {currencySymbol}{result.feeAmount.toFixed(2)}

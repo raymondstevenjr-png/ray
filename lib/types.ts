@@ -12,6 +12,7 @@ export interface Provider {
   reviews: number
   affiliate: string
   available?: boolean
+  feeNote?: string
 }
 
 export interface ProviderResult extends Provider {
