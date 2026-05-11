@@ -24,7 +24,7 @@ const US_PROVIDERS: Provider[] = [
   {
     name: "Sendwave",
     fee: "0%",
-    feeCalc: (a: number) => 0,
+    feeCalc: () => 0,
     rate: 22.52,
     delivery: "Minutes",
     method: "Mobile Money",
@@ -72,7 +72,7 @@ const US_PROVIDERS: Provider[] = [
   {
     name: "Ria",
     fee: "$2.99",
-    feeCalc: (a: number) => 2.99,
+    feeCalc: () => 2.99,
     rate: 22.13,
     delivery: "Minutes",
     method: "Cash Pickup",

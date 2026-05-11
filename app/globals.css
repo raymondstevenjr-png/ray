@@ -5,14 +5,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-playfair: "Playfair Display", Georgia, serif;
-  --font-dm-sans: "DM Sans", system-ui, sans-serif;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-dm-sans);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
 @layer utilities {
