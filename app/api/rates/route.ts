@@ -7,7 +7,7 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>()
-const CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 hours in ms
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in ms
 
 const FALLBACKS: Record<string, number> = {
   USD: 22.93,
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     // Always fetch from USD base, then convert if needed
     const res = await fetch(
       `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${currency}`,
-      { next: { revalidate: 21600 } }
+      { next: { revalidate: 300 } }
     )
 
     if (!res.ok) {

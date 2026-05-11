@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
                 </p>
               </div>
               <p style="color: #6b7280; font-size: 14px;">
-                We check rates every 6 hours. When the mid-market rate for ${currency} to SLE reaches your target,
+                We check rates every 5 minutes. When the mid-market rate for ${currency} to SLE reaches your target,
                 we'll send you an email so you can send at the best time.
               </p>
               <p style="color: #6b7280; font-size: 14px;">

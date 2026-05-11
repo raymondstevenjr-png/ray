@@ -43,7 +43,7 @@ export default function Hero() {
             🏦 8 providers compared
           </span>
           <span className="bg-white/10 border border-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
-            🔄 Rates updated every 6 hours
+            🔄 Rates updated every 5 minutes
           </span>
         </div>
 

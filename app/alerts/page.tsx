@@ -46,7 +46,7 @@ export default function AlertsPage() {
               {
                 icon: "🔍",
                 title: "We monitor 24/7",
-                desc: "We check the mid-market exchange rate every 6 hours using live data from global currency APIs.",
+                desc: "We check the mid-market exchange rate every 5 minutes using live data from global currency APIs.",
               },
               {
                 icon: "📧",
