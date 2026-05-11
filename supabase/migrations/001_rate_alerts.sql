@@ -9,3 +9,8 @@ create table if not exists rate_alerts (
 );
 create index on rate_alerts (email);
 create index on rate_alerts (active);
+
+-- Allow anonymous users to insert rate alerts (public form submission)
+alter table rate_alerts enable row level security;
+create policy "allow_anon_insert" on rate_alerts
+  for insert to anon with check (true);
