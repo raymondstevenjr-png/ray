@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSupabaseClient } from "@/lib/supabase"
+import { getSupabaseServerClient } from "@/lib/supabase"
 import { Resend } from "resend"
 
 export async function POST(request: NextRequest) {
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Save to Supabase
-    const supabase = getSupabaseClient()
+    const supabase = getSupabaseServerClient()
     const { error: dbError } = await supabase.from("rate_alerts").insert({
       email,
       target_rate,
