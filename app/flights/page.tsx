@@ -132,26 +132,41 @@ const AIRLINES = [
     name: "Brussels Airlines",
     description:
       "The primary carrier to Freetown, operating via Brussels with connections from North America, the UK, and Europe.",
+    book: "https://www.brusselsairlines.com",
+    affiliate: "https://www.awin.com/cread.php?awinmid=5528",
+    affiliateNetwork: "Awin",
   },
   {
     name: "Royal Air Maroc",
     description:
       "Serves Freetown via Casablanca, with connections from the US, UK, and Canada through its Moroccan hub.",
+    book: "https://www.royalairmaroc.com",
+    affiliate: "https://www.travelpayouts.com/programs/89",
+    affiliateNetwork: "Travelpayouts",
   },
   {
     name: "Air France",
     description:
       "Operates connections to Freetown via Paris Charles de Gaulle, often in partnership with Brussels Airlines.",
+    book: "https://www.airfrance.com",
+    affiliate: "https://www.awin.com/cread.php?awinmid=1517",
+    affiliateNetwork: "Awin",
   },
   {
     name: "British Airways",
     description:
       "Provides connections to Freetown via London Heathrow in codeshare with partner airlines.",
+    book: "https://www.britishairways.com",
+    affiliate: "https://www.britishairways.com/en-gb/information/about-ba/ba-affiliates",
+    affiliateNetwork: "BA Affiliates",
   },
   {
     name: "Kenya Airways",
     description:
       "Serves Freetown via Nairobi, offering an alternative East African routing.",
+    book: "https://www.kenya-airways.com",
+    affiliate: "https://www.travelpayouts.com/programs/205",
+    affiliateNetwork: "Travelpayouts",
   },
 ]
 
@@ -358,20 +373,46 @@ export default function FlightsPage() {
 
             {/* Airlines */}
             <section>
-              <h2 className="font-playfair text-2xl font-bold text-navy mb-4">
+              <h2 className="font-playfair text-2xl font-bold text-navy mb-1">
                 Airlines serving Freetown
               </h2>
+              <p className="text-gray-500 text-sm mb-4">
+                Each airline has a public affiliate program you can apply to and earn commission on bookings.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {AIRLINES.map((airline) => (
                   <div
                     key={airline.name}
-                    className="bg-white border border-gray-100 rounded-xl px-5 py-4"
+                    className="bg-white border border-gray-100 rounded-xl px-5 py-4 flex flex-col gap-3"
                   >
-                    <span className="font-semibold text-navy">{airline.name}</span>
-                    <p className="text-gray-500 text-sm mt-1">{airline.description}</p>
+                    <div>
+                      <span className="font-semibold text-navy">{airline.name}</span>
+                      <p className="text-gray-500 text-sm mt-1">{airline.description}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <a
+                        href={airline.book}
+                        target="_blank"
+                        rel="noopener noreferrer sponsored"
+                        className="inline-flex items-center gap-1 bg-gold hover:bg-gold-light text-navy text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        Book direct →
+                      </a>
+                      <a
+                        href={airline.affiliate}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 border border-navy text-navy hover:bg-navy hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        Apply to affiliate program · {airline.affiliateNetwork}
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-gray-400 mt-3">
+                Affiliate programs are operated by the airlines independently. RemitSL is not responsible for their terms or approval decisions.
+              </p>
             </section>
 
             {/* Travel tips */}
