@@ -12,6 +12,7 @@ export default function ChatDrawer() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
+  const [liveRate, setLiveRate] = useState<number | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -19,7 +20,13 @@ export default function ChatDrawer() {
     if (isOpen && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [isOpen])
+    if (isOpen && liveRate === null) {
+      fetch("/api/rates?currency=USD")
+        .then((r) => r.json())
+        .then((d) => setLiveRate(d.midMarket ?? null))
+        .catch(() => null)
+    }
+  }, [isOpen, liveRate])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -43,7 +50,9 @@ export default function ChatDrawer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: newMessages,
-          context: "User is on RemitSL website comparing remittance providers for Sierra Leone",
+          context: liveRate
+            ? `Live mid-market rate right now: 1 USD = ${liveRate.toFixed(4)} SLE. Provider rates on the comparison table are scaled from this live rate.`
+            : "User is on the RemitSL comparison page.",
         }),
       })
 
