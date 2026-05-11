@@ -10,9 +10,9 @@ const cache = new Map<string, CacheEntry>()
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in ms
 
 const FALLBACKS: Record<string, number> = {
-  USD: 22.93,
-  GBP: 29.05,
-  CAD: 16.88,
+  USD: 23.03,
+  GBP: 29.20,
+  CAD: 16.95,
 }
 
 export async function GET(request: NextRequest) {

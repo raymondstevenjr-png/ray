@@ -98,7 +98,7 @@ export default function ComparisonTable() {
           Enter your send amount and select your corridor to compare all providers instantly.
           {lastUpdated && (
             <span className="ml-2 text-xs text-gray-400">
-              Rates as of {lastUpdated}
+              Rates as of {lastUpdated} · Mid-market rate source: ExchangeRate-API
             </span>
           )}
         </p>
