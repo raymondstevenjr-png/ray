@@ -29,6 +29,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  other: {
+    "impact-site-verification": "7c5b5ab9-b504-4689-a2cd-a4f6f71470c8",
+  },
 }
 
 const navLinks = [
