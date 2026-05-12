@@ -37,7 +37,6 @@ export const metadata: Metadata = {
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/providers", label: "Providers" },
-  { href: "/flights", label: "Flights" },
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/alerts", label: "Alerts" },
@@ -140,14 +139,6 @@ export default function RootLayout({
                       className="text-gray-300 hover:text-gold text-sm transition-colors"
                     >
                       Credit Cards
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/flights"
-                      className="text-gray-300 hover:text-gold text-sm transition-colors"
-                    >
-                      Flights
                     </Link>
                   </li>
                 </ul>
