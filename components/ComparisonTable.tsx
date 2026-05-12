@@ -23,6 +23,23 @@ const CORRIDOR_LABELS: Record<Corridor, string> = {
   CA: "🇨🇦 CAD",
 }
 
+const WISE_AFFILIATE_DEFAULT = "https://wise.prf.hn/click/camref:1100l5K942"
+
+const EUROPEAN_COUNTRIES = new Set([
+  "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR",
+  "HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK",
+  "SI","ES","SE","NO","CH","IS","LI","AL","BA","ME","MK","RS","XK",
+])
+
+function getWiseUrlForCountry(countryCode: string): string {
+  if (countryCode === "US") return "https://wise.prf.hn/click/camref:1100l5K942"
+  if (countryCode === "GB") return "https://wise.prf.hn/click/camref:1100l5K9SQ"
+  if (countryCode === "AU") return "https://wise.prf.hn/click/camref:1100l5K9SN"
+  if (countryCode === "JP") return "https://wise.prf.hn/click/camref:1100l5K9SP"
+  if (EUROPEAN_COUNTRIES.has(countryCode)) return "https://wise.prf.hn/click/camref:1100l5K9SR"
+  return WISE_AFFILIATE_DEFAULT
+}
+
 function SkeletonRow() {
   return (
     <tr className="border-b border-gray-100">
@@ -42,6 +59,7 @@ export default function ComparisonTable() {
   const [liveMidMarket, setLiveMidMarket] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [rateTimestamp, setRateTimestamp] = useState<number | null>(null)
+  const [wiseAffiliateUrl, setWiseAffiliateUrl] = useState<string>(WISE_AFFILIATE_DEFAULT)
 
   const currency = CORRIDOR_CURRENCY[corridor]
   const symbol = CURRENCY_SYMBOL[currency]
@@ -63,6 +81,18 @@ export default function ComparisonTable() {
   useEffect(() => {
     fetchRate(currency)
   }, [currency, fetchRate])
+
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((r) => r.json())
+      .then((data) => {
+        const code: string = data.country_code ?? ""
+        setWiseAffiliateUrl(getWiseUrlForCountry(code))
+      })
+      .catch(() => {
+        // keep default on error
+      })
+  }, [])
 
   const handleCorridorChange = (c: Corridor) => {
     setCorridor(c)
@@ -207,6 +237,7 @@ export default function ComparisonTable() {
                     key={result.name}
                     result={result}
                     currencySymbol={symbol}
+                    affiliateOverride={result.name === "Wise" ? wiseAffiliateUrl : undefined}
                   />
                 ))
               )}

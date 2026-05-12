@@ -3,6 +3,7 @@ import type { ProviderResult } from "@/lib/types"
 interface ProviderRowProps {
   result: ProviderResult
   currencySymbol: string
+  affiliateOverride?: string
 }
 
 function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
@@ -40,8 +41,9 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
   )
 }
 
-export default function ProviderRow({ result, currencySymbol }: ProviderRowProps) {
+export default function ProviderRow({ result, currencySymbol, affiliateOverride }: ProviderRowProps) {
   const isBestValue = result.rank === 1
+  const affiliateUrl = affiliateOverride ?? result.affiliate
 
   return (
     <tr
@@ -125,7 +127,7 @@ export default function ProviderRow({ result, currencySymbol }: ProviderRowProps
       {/* CTA */}
       <td className="py-4 px-3">
         <a
-          href={result.affiliate}
+          href={affiliateUrl}
           target="_blank"
           rel="noopener noreferrer sponsored"
           className="inline-block bg-gold hover:bg-gold-light text-navy font-semibold text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
