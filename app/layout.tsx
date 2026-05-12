@@ -50,6 +50,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`}>
+      <head>
+        <meta name="fo-verify" content="4ebd1cfc-75d9-4b68-896d-6062a760a6f6" />
+      </head>
       <body className="font-dm-sans antialiased bg-white text-gray-900 min-h-screen flex flex-col">
         {/* Top Sierra Leone flag bar */}
         <div className="flex h-2 w-full" aria-hidden="true">
