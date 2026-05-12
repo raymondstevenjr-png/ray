@@ -42,8 +42,7 @@ const US_PROVIDERS: Provider[] = [
     method: "Bank Transfer",
     rating: 4.8,
     reviews: 14800,
-    affiliate:
-      "https://wise.com/?utm_source=remitsl&utm_medium=affiliate&utm_campaign=sierra-leone-comparison",
+    affiliate: "https://wise.prf.hn/click/camref:1100l5K942",
   },
   {
     name: "Remitly",
@@ -174,7 +173,7 @@ const UK_AFFILIATES: Record<string, string> = {
   Wave: "https://www.wave.com/?utm_source=remitsl&utm_medium=affiliate&utm_campaign=sierra-leone-comparison",
   Sendwave:
     "https://www.sendwave.com/?utm_source=remitsl&utm_medium=affiliate&utm_campaign=sierra-leone-comparison",
-  Wise: "https://wise.com/?utm_source=remitsl&utm_medium=affiliate&utm_campaign=sierra-leone-comparison",
+  Wise: "https://wise.prf.hn/click/camref:1100l5K942",
   Remitly:
     "https://www.remitly.com/?utm_source=remitsl&utm_medium=affiliate&utm_campaign=sierra-leone-comparison",
   WorldRemit:
