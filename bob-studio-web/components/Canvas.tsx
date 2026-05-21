@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import {
   IconUpload, IconPlayerPlay, IconPlayerPause,
   IconPlayerSkipBack, IconPlayerSkipForward,
-  IconVolume, IconMaximize
+  IconVolume, IconMaximize, IconSubtask
 } from '@tabler/icons-react'
 import { useEditor } from '../context/EditorContext'
 
@@ -19,12 +19,34 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
   const { state, dispatch } = useEditor()
   const {
     originalVideoUrl, processedVideoUrl, isPlaying, currentTime, duration,
-    subtitleStatus, bgStatus, greenStatus, errorMessage, language
+    subtitleStatus, bgStatus, greenStatus, errorMessage, language,
+    transcriptVtt,
   } = state
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const trackRef = useRef<HTMLTrackElement>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [subtitlesOn, setSubtitlesOn] = useState(true)
+  const [vttBlobUrl, setVttBlobUrl] = useState<string | null>(null)
+
+  // Build a blob URL from the VTT string whenever it changes
+  useEffect(() => {
+    if (!transcriptVtt) { setVttBlobUrl(null); return }
+    const blob = new Blob([transcriptVtt], { type: 'text/vtt' })
+    const url = URL.createObjectURL(blob)
+    setVttBlobUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [transcriptVtt])
+
+  // Show/hide subtitle track on the video element
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const track = video.textTracks[0]
+    if (!track) return
+    track.mode = subtitlesOn ? 'showing' : 'hidden'
+  }, [subtitlesOn, vttBlobUrl])
 
   const anyProcessing = subtitleStatus === 'uploading' || subtitleStatus === 'processing'
     || bgStatus === 'uploading' || bgStatus === 'processing'
@@ -35,7 +57,7 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
 
   function getOverlayMessage() {
     if (subtitleStatus === 'uploading') return { text: 'Uploading to fal storage...', color: '#e8e6e0' }
-    if (subtitleStatus === 'processing') return { text: 'Adding subtitles... (~$0.10/min)', color: '#e8e6e0' }
+    if (subtitleStatus === 'processing') return { text: 'Transcribing with AssemblyAI...', color: '#e8e6e0' }
     if (bgStatus === 'processing') return { text: 'Removing background...', color: '#e8e6e0' }
     if (greenStatus === 'processing') return { text: 'Processing green screen...', color: '#e8e6e0' }
     if (anyDone) return { text: 'Done! Ready to download.', color: '#5ec488' }
@@ -159,7 +181,17 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleMetadata}
-          />
+          >
+            {vttBlobUrl && (
+              <track
+                ref={trackRef}
+                kind="subtitles"
+                src={vttBlobUrl}
+                default
+                label="AssemblyAI"
+              />
+            )}
+          </video>
         )}
 
         {/* Status overlay */}
@@ -227,6 +259,24 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
             if (videoRef.current) videoRef.current.volume = Number(e.target.value) / 100
           }}
         />
+
+        {vttBlobUrl && (
+          <button
+            onClick={() => setSubtitlesOn(v => !v)}
+            title={subtitlesOn ? 'Hide subtitles' : 'Show subtitles'}
+            style={{
+              background: subtitlesOn ? '#2c2200' : 'none',
+              border: subtitlesOn ? '0.5px solid #5a3a0a' : 'none',
+              borderRadius: 4,
+              padding: '2px 4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <IconSubtask size={14} color={subtitlesOn ? '#f5a623' : '#444'} />
+          </button>
+        )}
 
         <button
           onClick={() => videoRef.current?.requestFullscreen()}
