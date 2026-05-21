@@ -21,21 +21,22 @@ function EditorLayout() {
     dispatch({ type: 'SET_ORIGINAL_URL', payload: localUrl })
     dispatch({ type: 'SET_PROCESSED_URL', payload: null })
 
-    // Upload to fal storage — only set originalVideoUrl to the CDN URL on success
+    // Stream upload to AssemblyAI storage — gives a CDN URL usable by all AI APIs
     dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'uploading' })
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const res = await fetch('/api/assemblyai-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': file.type || 'video/mp4' },
+        body: file,
+      })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
-      // Replace blob URL with the publicly accessible fal CDN URL
+      // Replace blob URL with publicly accessible AssemblyAI CDN URL
       dispatch({ type: 'SET_ORIGINAL_URL', payload: data.url })
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'idle' })
     } catch (err) {
-      // Keep blob URL for local preview but surface the upload failure
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'idle' })
-      dispatch({ type: 'SET_ERROR', payload: `Upload failed — AI features won't work until upload succeeds. ${(err as Error).message}` })
+      dispatch({ type: 'SET_ERROR', payload: `Upload failed — ${(err as Error).message}` })
     }
   }, [dispatch])
 
