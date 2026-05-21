@@ -1,5 +1,7 @@
 import { AssemblyAI } from 'assemblyai'
 
+export const maxDuration = 300 // seconds — requires Vercel Pro; Hobby caps at 60s
+
 const client = new AssemblyAI({ apiKey: process.env.ASSEMBLYAI_API_KEY! })
 
 // Map BCP-47 codes to AssemblyAI base codes where supported
@@ -15,6 +17,9 @@ export async function POST(req: Request) {
   try {
     const { videoUrl, language } = await req.json()
     if (!videoUrl) return Response.json({ error: 'No video URL provided' }, { status: 400 })
+    if (videoUrl.startsWith('blob:')) {
+      return Response.json({ error: 'Video is still uploading — wait a moment and try again.' }, { status: 400 })
+    }
 
     const mappedLang = language ? LANG_MAP[language] : null
 
@@ -45,6 +50,7 @@ export async function POST(req: Request) {
       detectedLanguage: transcript.language_code,
     })
   } catch (error) {
-    return Response.json({ error: 'Transcription failed' }, { status: 500 })
+    const msg = error instanceof Error ? error.message : String(error)
+    return Response.json({ error: `Transcription failed: ${msg}` }, { status: 500 })
   }
 }

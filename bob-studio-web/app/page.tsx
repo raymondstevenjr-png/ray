@@ -15,11 +15,12 @@ function EditorLayout() {
 
   const handleFileSelect = useCallback(async (file: File) => {
     dispatch({ type: 'SET_FILE_NAME', payload: file.name })
-    // Create local URL for preview
+    // Local blob URL for immediate video preview — NOT sent to AI APIs
     const localUrl = URL.createObjectURL(file)
     dispatch({ type: 'SET_ORIGINAL_URL', payload: localUrl })
+    dispatch({ type: 'SET_PROCESSED_URL', payload: null })
 
-    // Upload to fal storage
+    // Upload to fal storage — only set originalVideoUrl to the CDN URL on success
     dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'uploading' })
     try {
       const formData = new FormData()
@@ -27,10 +28,13 @@ function EditorLayout() {
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
+      // Replace blob URL with the publicly accessible fal CDN URL
       dispatch({ type: 'SET_ORIGINAL_URL', payload: data.url })
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'idle' })
-    } catch {
+    } catch (err) {
+      // Keep blob URL for local preview but surface the upload failure
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'idle' })
+      dispatch({ type: 'SET_ERROR', payload: `Upload failed — AI features won't work until upload succeeds. ${(err as Error).message}` })
     }
   }, [dispatch])
 
