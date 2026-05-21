@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     const url = await fal.storage.upload(file)
     return Response.json({ url })
   } catch (error) {
-    return Response.json({ error: "Upload failed" }, { status: 500 })
+    const msg = error instanceof Error ? error.message : String(error)
+    return Response.json({ error: `Upload failed: ${msg}` }, { status: 500 })
   }
 }
