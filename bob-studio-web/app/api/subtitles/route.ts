@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       audio: videoUrl,
       speech_models: ['universal-3-pro', 'universal-2'],
       language_code: language || 'en',
+      speaker_labels: true,
     })
 
     return Response.json({
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
       srt: await client.transcripts.subtitles(transcript.id, 'srt'),
       vtt: await client.transcripts.subtitles(transcript.id, 'vtt'),
       words: transcript.words,
+      utterances: transcript.utterances ?? [],
     })
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useEditor } from '../context/EditorContext'
+import BurnSubtitles from './BurnSubtitles'
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 10,
@@ -37,9 +38,15 @@ function downloadBlob(content: string, filename: string, mime: string) {
 export function SubtitlesPanel() {
   const { state, dispatch } = useEditor()
   const {
-    originalVideoUrl, subtitleStatus, language,
+    originalVideoUrl, processedVideoUrl, subtitleStatus, language,
     transcriptText, transcriptSrt, transcriptVtt, detectedLanguage,
+    uploadedFileName,
   } = state
+
+  const [utterances, setUtterances] = useState<any[]>([])
+  const [translateLang, setTranslateLang] = useState('Swahili')
+  const [translating, setTranslating] = useState(false)
+  const [translatedText, setTranslatedText] = useState('')
 
   const selectStyle: React.CSSProperties = {
     background: '#1a1a1c',
@@ -74,10 +81,31 @@ export function SubtitlesPanel() {
           detectedLanguage: data.detectedLanguage ?? '',
         },
       })
+      setUtterances(data.utterances ?? [])
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'done' })
     } catch (err) {
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'error' })
       dispatch({ type: 'SET_ERROR', payload: (err as Error).message })
+    }
+  }
+
+  async function handleTranslate() {
+    if (!transcriptText) return
+    setTranslating(true)
+    setTranslatedText('')
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: transcriptText, targetLanguage: translateLang }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setTranslatedText(data.translated)
+    } catch (err) {
+      setTranslatedText(`Error: ${(err as Error).message}`)
+    } finally {
+      setTranslating(false)
     }
   }
 
@@ -169,6 +197,29 @@ export function SubtitlesPanel() {
             </p>
           </div>
 
+          {/* Speakers */}
+          {utterances.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <p style={{ fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>
+                Speakers
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {utterances.map((u: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <span style={{
+                      fontSize: 10, fontWeight: 600, color: '#f5a623',
+                      background: '#2c2200', border: '0.5px solid #5a3a0a',
+                      borderRadius: 3, padding: '2px 6px', flexShrink: 0, marginTop: 1,
+                    }}>
+                      {u.speaker}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#aaa', lineHeight: 1.6 }}>{u.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Download buttons */}
           <div style={{ display: 'flex', gap: 8 }}>
             <button
@@ -195,9 +246,63 @@ export function SubtitlesPanel() {
             </button>
           </div>
 
+          {transcriptSrt && (originalVideoUrl || processedVideoUrl) && (
+            <BurnSubtitles
+              videoUrl={processedVideoUrl ?? originalVideoUrl!}
+              srtContent={transcriptSrt}
+              fileName={uploadedFileName || 'video.mp4'}
+            />
+          )}
+
           <p style={{ fontSize: 10, color: '#444', marginTop: 10, textAlign: 'center' }}>
             Load the .srt into any video player or editor to display captions
           </p>
+
+          {/* Translate */}
+          <div style={{ marginTop: 14 }}>
+            <p style={{ fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>
+              Translate
+            </p>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <select
+                value={translateLang}
+                onChange={e => setTranslateLang(e.target.value)}
+                style={{ ...selectStyle, flex: 1, marginBottom: 0 }}
+              >
+                <option value="Swahili">Swahili</option>
+                <option value="Yoruba">Yoruba</option>
+                <option value="Hausa">Hausa</option>
+                <option value="Amharic">Amharic</option>
+                <option value="Igbo">Igbo</option>
+                <option value="Zulu">Zulu</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Arabic">Arabic</option>
+                <option value="Portuguese">Portuguese</option>
+              </select>
+              <button
+                onClick={handleTranslate}
+                disabled={translating}
+                style={{
+                  background: '#1e1e20', color: '#e8e6e0', border: '0.5px solid #242426',
+                  borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: translating ? 'not-allowed' : 'pointer',
+                  fontFamily: 'DM Sans, sans-serif', fontWeight: 500, flexShrink: 0,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}
+              >
+                {translating ? <Spinner /> : null}
+                {translating ? 'Translating...' : 'Translate'}
+              </button>
+            </div>
+            {translatedText && (
+              <div style={{
+                background: '#141415', border: '0.5px solid #242426', borderRadius: 8,
+                padding: 14, maxHeight: 160, overflowY: 'auto',
+              }}>
+                <p style={{ fontSize: 12, color: '#aaa', lineHeight: 1.7, margin: 0 }}>{translatedText}</p>
+              </div>
+            )}
+          </div>
         </>
       )}
 

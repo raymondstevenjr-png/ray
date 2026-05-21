@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@fal-ai/client": "^1.2.0",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@tabler/icons-react": "^3.14.0",
     "assemblyai": "^4.33.3",
     "next": "14.2.5",
