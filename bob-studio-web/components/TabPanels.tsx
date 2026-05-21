@@ -40,7 +40,7 @@ export function SubtitlesPanel() {
   const {
     originalVideoUrl, processedVideoUrl, subtitleStatus, language,
     transcriptText, transcriptSrt, transcriptVtt, detectedLanguage,
-    uploadedFileName,
+    uploadedFileName, uploadedFile,
   } = state
 
   const [utterances, setUtterances] = useState<any[]>([])
@@ -61,15 +61,27 @@ export function SubtitlesPanel() {
   }
 
   async function generate() {
-    if (!originalVideoUrl) return
+    if (!originalVideoUrl && !uploadedFile) return
     dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'processing' })
     dispatch({ type: 'SET_ERROR', payload: null })
     try {
-      const res = await fetch('/api/subtitles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: originalVideoUrl, language }),
-      })
+      let res: Response
+      const isBlobUrl = originalVideoUrl?.startsWith('blob:')
+
+      if (isBlobUrl && uploadedFile) {
+        // fal.ai upload failed — send the file directly to be uploaded by AssemblyAI
+        const formData = new FormData()
+        formData.append('file', uploadedFile)
+        formData.append('language', language)
+        res = await fetch('/api/subtitles', { method: 'POST', body: formData })
+      } else {
+        res = await fetch('/api/subtitles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: originalVideoUrl, language }),
+        })
+      }
+
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       dispatch({
@@ -144,7 +156,7 @@ export function SubtitlesPanel() {
 
       <button
         onClick={generate}
-        disabled={!originalVideoUrl || subtitleStatus === 'processing'}
+        disabled={!originalVideoUrl || subtitleStatus === 'processing' || subtitleStatus === 'uploading'}
         style={{
           background: '#f5a623',
           color: '#0e0e0f',
@@ -154,8 +166,8 @@ export function SubtitlesPanel() {
           padding: '10px',
           borderRadius: 6,
           fontSize: 13,
-          cursor: !originalVideoUrl || subtitleStatus === 'processing' ? 'not-allowed' : 'pointer',
-          opacity: !originalVideoUrl ? 0.5 : 1,
+          cursor: !originalVideoUrl || subtitleStatus === 'processing' || subtitleStatus === 'uploading' ? 'not-allowed' : 'pointer',
+          opacity: !originalVideoUrl || subtitleStatus === 'uploading' ? 0.5 : 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -164,8 +176,9 @@ export function SubtitlesPanel() {
           marginBottom: 16,
         }}
       >
-        {subtitleStatus === 'processing' && <Spinner />}
+        {(subtitleStatus === 'processing' || subtitleStatus === 'uploading') && <Spinner />}
         {subtitleStatus === 'idle' && '✦ Generate Subtitles'}
+        {subtitleStatus === 'uploading' && 'Uploading video...'}
         {subtitleStatus === 'processing' && 'Transcribing...'}
         {subtitleStatus === 'done' && '↺ Re-generate'}
         {subtitleStatus === 'error' && '✗ Failed — Retry'}

@@ -25,6 +25,7 @@ export interface EditorState {
   originalVideoUrl: string | null
   processedVideoUrl: string | null
   uploadedFileName: string
+  uploadedFile: File | null
   isPlaying: boolean
   currentTime: number
   duration: number

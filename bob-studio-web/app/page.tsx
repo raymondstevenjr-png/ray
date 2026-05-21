@@ -15,6 +15,7 @@ function EditorLayout() {
 
   const handleFileSelect = useCallback(async (file: File) => {
     dispatch({ type: 'SET_FILE_NAME', payload: file.name })
+    dispatch({ type: 'SET_UPLOAD_FILE', payload: file })
     // Local blob URL for immediate video preview — NOT sent to AI APIs
     const localUrl = URL.createObjectURL(file)
     dispatch({ type: 'SET_ORIGINAL_URL', payload: localUrl })

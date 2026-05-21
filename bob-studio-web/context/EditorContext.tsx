@@ -35,6 +35,7 @@ const initialState: EditorState = {
   originalVideoUrl: null,
   processedVideoUrl: null,
   uploadedFileName: '',
+  uploadedFile: null,
   isPlaying: false,
   currentTime: 0,
   duration: 0,
@@ -65,6 +66,7 @@ type Action =
   | { type: 'SET_ORIGINAL_URL'; payload: string }
   | { type: 'SET_PROCESSED_URL'; payload: string | null }
   | { type: 'SET_FILE_NAME'; payload: string }
+  | { type: 'SET_UPLOAD_FILE'; payload: File | null }
   | { type: 'SET_PLAYING'; payload: boolean }
   | { type: 'SET_CURRENT_TIME'; payload: number }
   | { type: 'SET_DURATION'; payload: number }
@@ -92,6 +94,7 @@ function reducer(state: EditorState, action: Action): EditorState {
     case 'SET_ORIGINAL_URL': return { ...state, originalVideoUrl: action.payload }
     case 'SET_PROCESSED_URL': return { ...state, processedVideoUrl: action.payload }
     case 'SET_FILE_NAME': return { ...state, uploadedFileName: action.payload }
+    case 'SET_UPLOAD_FILE': return { ...state, uploadedFile: action.payload }
     case 'SET_PLAYING': return { ...state, isPlaying: action.payload }
     case 'SET_CURRENT_TIME': return { ...state, currentTime: action.payload }
     case 'SET_DURATION': return { ...state, duration: action.payload }
