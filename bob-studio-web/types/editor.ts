@@ -33,7 +33,10 @@ export interface EditorState {
   subtitleStatus: SubtitleStatus
   bgStatus: SubtitleStatus
   greenStatus: SubtitleStatus
-  subtitlePreset: string
+  transcriptText: string | null
+  transcriptSrt: string | null
+  transcriptVtt: string | null
+  detectedLanguage: string | null
   language: string
   activeTab: ActiveTab
   activeTool: string

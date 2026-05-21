@@ -3,13 +3,6 @@
 import { useState } from 'react'
 import { useEditor } from '../context/EditorContext'
 
-const DYNAMIC_PRESETS = ['glass', 'whisper', 'glide2', 'fusion', 'glide', 'terminal', 'handwritten']
-const BASIC_PRESETS = [
-  'simple', 'plain', 'beans', 'corpo', 'boo', 'shadeplay', 'casper', 'capri',
-  'lowkey', 'vinta', 'diego', 'ali', 'slay', 'kitty', 'hustle', 'karl', 'sprout',
-  'flex', 'mint', 'rizz', 'vegas'
-]
-
 const sectionTitle: React.CSSProperties = {
   fontSize: 10,
   color: '#555',
@@ -31,45 +24,22 @@ function Spinner() {
   )
 }
 
+function downloadBlob(content: string, filename: string, mime: string) {
+  const blob = new Blob([content], { type: mime })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export function SubtitlesPanel() {
   const { state, dispatch } = useEditor()
   const {
-    originalVideoUrl, processedVideoUrl, subtitleStatus,
-    subtitlePreset, language,
+    originalVideoUrl, subtitleStatus, language,
+    transcriptText, transcriptSrt, transcriptVtt, detectedLanguage,
   } = state
-
-  async function generate() {
-    if (!originalVideoUrl) return
-    dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'processing' })
-    try {
-      const res = await fetch('/api/subtitles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: originalVideoUrl, preset: subtitlePreset, language }),
-      })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-      dispatch({ type: 'SET_PROCESSED_URL', payload: data.videoUrl })
-      dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'done' })
-    } catch (err) {
-      dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'error' })
-      dispatch({ type: 'SET_ERROR', payload: (err as Error).message })
-    }
-  }
-
-  function download() {
-    const url = processedVideoUrl
-    if (!url) return
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'subtitled-video.mp4'
-    a.click()
-  }
-
-  const allPresets = [
-    ...DYNAMIC_PRESETS.map(p => ({ id: p, dynamic: true })),
-    ...BASIC_PRESETS.map(p => ({ id: p, dynamic: false })),
-  ]
 
   const selectStyle: React.CSSProperties = {
     background: '#1a1a1c',
@@ -83,53 +53,56 @@ export function SubtitlesPanel() {
     marginBottom: 12,
   }
 
+  async function generate() {
+    if (!originalVideoUrl) return
+    dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'processing' })
+    dispatch({ type: 'SET_ERROR', payload: null })
+    try {
+      const res = await fetch('/api/subtitles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: originalVideoUrl, language }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      dispatch({
+        type: 'SET_TRANSCRIPT',
+        payload: {
+          text: data.transcript ?? '',
+          srt: data.srt ?? '',
+          vtt: data.vtt ?? '',
+          detectedLanguage: data.detectedLanguage ?? '',
+        },
+      })
+      dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'done' })
+    } catch (err) {
+      dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'error' })
+      dispatch({ type: 'SET_ERROR', payload: (err as Error).message })
+    }
+  }
+
   return (
-    <div style={{ padding: 20, maxWidth: 700, margin: '0 auto', overflowY: 'auto', maxHeight: '100%' }}>
-      <p style={sectionTitle}>Subtitle Style</p>
+    <div style={{ padding: 20, maxWidth: 640, margin: '0 auto', overflowY: 'auto', maxHeight: '100%' }}>
+      <p style={sectionTitle}>Transcription — AssemblyAI Universal-3 Pro</p>
 
-      {/* Preset grid */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-        {allPresets.map(p => (
-          <div
-            key={p.id}
-            onClick={() => dispatch({ type: 'SET_SUBTITLE_PRESET', payload: p.id })}
-            style={{
-              width: 90,
-              padding: '8px',
-              borderRadius: 6,
-              background: subtitlePreset === p.id ? '#1e1e20' : '#141415',
-              border: `0.5px solid ${subtitlePreset === p.id ? '#f5a623' : '#242426'}`,
-              cursor: 'pointer',
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 500, color: '#e8e6e0', marginBottom: 2 }}>{p.id}</div>
-            <div style={{ fontSize: 9, color: p.dynamic ? '#f5a623' : '#555' }}>
-              {p.dynamic ? 'Dynamic' : 'Basic'}
-            </div>
-            <div style={{ fontSize: 9, color: '#444' }}>{p.dynamic ? '2x' : '1x'}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Language */}
       <select
         value={language}
         onChange={e => dispatch({ type: 'SET_LANGUAGE', payload: e.target.value })}
         style={selectStyle}
       >
+        <option value="">Auto-detect language</option>
         <optgroup label="Global">
-          <option value="en-US">English US</option>
-          <option value="en-GB">English UK</option>
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
           <option value="fr-FR">French</option>
           <option value="es-ES">Spanish</option>
           <option value="de-DE">German</option>
           <option value="pt-BR">Portuguese</option>
-          <option value="ar-SA">Arabic</option>
           <option value="zh">Chinese</option>
           <option value="ja-JP">Japanese</option>
           <option value="ko-KR">Korean</option>
         </optgroup>
-        <optgroup label="African Languages">
+        <optgroup label="African Languages (auto-detected)">
           <option value="sw-KE">Swahili</option>
           <option value="yo-NG">Yoruba</option>
           <option value="ha-NG">Hausa</option>
@@ -142,12 +115,12 @@ export function SubtitlesPanel() {
       </select>
 
       <button
-        onClick={subtitleStatus === 'done' ? download : generate}
+        onClick={generate}
         disabled={!originalVideoUrl || subtitleStatus === 'processing'}
         style={{
-          background: subtitleStatus === 'done' ? '#1a3a2a' : '#f5a623',
-          color: subtitleStatus === 'done' ? '#5ec488' : '#0e0e0f',
-          border: subtitleStatus === 'done' ? '0.5px solid #2a5540' : 'none',
+          background: '#f5a623',
+          color: '#0e0e0f',
+          border: 'none',
           fontWeight: 600,
           width: '100%',
           padding: '10px',
@@ -160,14 +133,73 @@ export function SubtitlesPanel() {
           justifyContent: 'center',
           gap: 8,
           fontFamily: 'DM Sans, sans-serif',
+          marginBottom: 16,
         }}
       >
         {subtitleStatus === 'processing' && <Spinner />}
-        {subtitleStatus === 'idle' && 'Generate Subtitles'}
-        {subtitleStatus === 'processing' && 'Generating...'}
-        {subtitleStatus === 'done' && 'Download subtitled video'}
-        {subtitleStatus === 'error' && 'Retry'}
+        {subtitleStatus === 'idle' && '✦ Generate Subtitles'}
+        {subtitleStatus === 'processing' && 'Transcribing...'}
+        {subtitleStatus === 'done' && '↺ Re-generate'}
+        {subtitleStatus === 'error' && '✗ Failed — Retry'}
       </button>
+
+      {subtitleStatus === 'done' && transcriptText && (
+        <>
+          {detectedLanguage && (
+            <p style={{ fontSize: 11, color: '#555', marginBottom: 12 }}>
+              Detected language: <span style={{ color: '#f5a623' }}>{detectedLanguage}</span>
+            </p>
+          )}
+
+          {/* Transcript preview */}
+          <div style={{
+            background: '#141415',
+            border: '0.5px solid #242426',
+            borderRadius: 8,
+            padding: 14,
+            marginBottom: 14,
+            maxHeight: 180,
+            overflowY: 'auto',
+          }}>
+            <p style={{ fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>
+              Transcript
+            </p>
+            <p style={{ fontSize: 12, color: '#aaa', lineHeight: 1.7, margin: 0 }}>
+              {transcriptText}
+            </p>
+          </div>
+
+          {/* Download buttons */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => downloadBlob(transcriptSrt!, 'subtitles.srt', 'text/plain')}
+              style={{
+                flex: 1, background: '#1a3a2a', color: '#5ec488',
+                border: '0.5px solid #2a5540', fontWeight: 600,
+                padding: '9px', borderRadius: 6, fontSize: 12,
+                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+              }}
+            >
+              ↓ Download .srt
+            </button>
+            <button
+              onClick={() => downloadBlob(transcriptVtt!, 'subtitles.vtt', 'text/vtt')}
+              style={{
+                flex: 1, background: '#1a2a3a', color: '#7ab8f5',
+                border: '0.5px solid #2a4560', fontWeight: 600,
+                padding: '9px', borderRadius: 6, fontSize: 12,
+                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+              }}
+            >
+              ↓ Download .vtt
+            </button>
+          </div>
+
+          <p style={{ fontSize: 10, color: '#444', marginTop: 10, textAlign: 'center' }}>
+            Load the .srt into any video player or editor to display captions
+          </p>
+        </>
+      )}
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
@@ -435,8 +467,8 @@ export function ExportPanel() {
       }}>
         <p style={{ fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 1, margin: '0 0 8px' }}>Cost estimate</p>
         <div style={{ fontSize: 12, color: '#aaa' }}>
-          {subtitleStatus === 'done' && <div>✓ Subtitles: ~$0.10/min</div>}
-          <div style={{ color: '#555', marginTop: 4 }}>fal.ai · VEED API</div>
+          {subtitleStatus === 'done' && <div>✓ Subtitles: AssemblyAI Universal-3 Pro</div>}
+          <div style={{ color: '#555', marginTop: 4 }}>fal.ai · AssemblyAI</div>
         </div>
       </div>
 

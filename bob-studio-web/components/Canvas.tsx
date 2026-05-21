@@ -14,20 +14,12 @@ function formatTime(s: number) {
   return `${m}:${sec.toString().padStart(2, '0')}`
 }
 
-const SUBTITLE_PRESETS_DYNAMIC = [
-  'glass', 'whisper', 'glide2', 'fusion', 'glide', 'terminal', 'handwritten'
-]
-const SUBTITLE_PRESETS_BASIC = [
-  'simple', 'plain', 'beans', 'corpo', 'boo', 'shadeplay', 'casper', 'capri',
-  'lowkey', 'vinta', 'diego', 'ali', 'slay', 'kitty', 'hustle', 'karl', 'sprout',
-  'flex', 'mint', 'rizz', 'vegas'
-]
 
 export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) => void }) {
   const { state, dispatch } = useEditor()
   const {
     originalVideoUrl, processedVideoUrl, isPlaying, currentTime, duration,
-    subtitleStatus, bgStatus, greenStatus, errorMessage, subtitlePreset, language
+    subtitleStatus, bgStatus, greenStatus, errorMessage, language
   } = state
 
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -244,26 +236,14 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
         </button>
       </div>
 
-      {/* Preset + Language row */}
+      {/* Language row */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
-        <select
-          value={subtitlePreset}
-          onChange={e => dispatch({ type: 'SET_SUBTITLE_PRESET', payload: e.target.value })}
-          style={selectStyle}
-        >
-          <optgroup label="Dynamic (2x price)">
-            {SUBTITLE_PRESETS_DYNAMIC.map(p => <option key={p} value={p}>{p}</option>)}
-          </optgroup>
-          <optgroup label="Basic (1x price)">
-            {SUBTITLE_PRESETS_BASIC.map(p => <option key={p} value={p}>{p}</option>)}
-          </optgroup>
-        </select>
-
         <select
           value={language}
           onChange={e => dispatch({ type: 'SET_LANGUAGE', payload: e.target.value })}
           style={selectStyle}
         >
+          <option value="">Auto-detect language</option>
           <optgroup label="Global">
             <option value="en-US">English US</option>
             <option value="en-GB">English UK</option>
@@ -271,7 +251,6 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
             <option value="es-ES">Spanish</option>
             <option value="de-DE">German</option>
             <option value="pt-BR">Portuguese</option>
-            <option value="ar-SA">Arabic</option>
             <option value="zh">Chinese</option>
             <option value="ja-JP">Japanese</option>
             <option value="ko-KR">Korean</option>

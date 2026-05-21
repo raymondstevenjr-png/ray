@@ -43,7 +43,10 @@ const initialState: EditorState = {
   subtitleStatus: 'idle',
   bgStatus: 'idle',
   greenStatus: 'idle',
-  subtitlePreset: 'glass',
+  transcriptText: null,
+  transcriptSrt: null,
+  transcriptVtt: null,
+  detectedLanguage: null,
   language: 'en-US',
   activeTab: 'edit',
   activeTool: '',
@@ -70,7 +73,7 @@ type Action =
   | { type: 'SET_SUBTITLE_STATUS'; payload: SubtitleStatus }
   | { type: 'SET_BG_STATUS'; payload: SubtitleStatus }
   | { type: 'SET_GREEN_STATUS'; payload: SubtitleStatus }
-  | { type: 'SET_SUBTITLE_PRESET'; payload: string }
+  | { type: 'SET_TRANSCRIPT'; payload: { text: string; srt: string; vtt: string; detectedLanguage: string } }
   | { type: 'SET_LANGUAGE'; payload: string }
   | { type: 'SET_ACTIVE_TAB'; payload: ActiveTab }
   | { type: 'SET_ACTIVE_TOOL'; payload: string }
@@ -97,7 +100,13 @@ function reducer(state: EditorState, action: Action): EditorState {
     case 'SET_SUBTITLE_STATUS': return { ...state, subtitleStatus: action.payload }
     case 'SET_BG_STATUS': return { ...state, bgStatus: action.payload }
     case 'SET_GREEN_STATUS': return { ...state, greenStatus: action.payload }
-    case 'SET_SUBTITLE_PRESET': return { ...state, subtitlePreset: action.payload }
+    case 'SET_TRANSCRIPT': return {
+      ...state,
+      transcriptText: action.payload.text,
+      transcriptSrt: action.payload.srt,
+      transcriptVtt: action.payload.vtt,
+      detectedLanguage: action.payload.detectedLanguage,
+    }
     case 'SET_LANGUAGE': return { ...state, language: action.payload }
     case 'SET_ACTIVE_TAB': return { ...state, activeTab: action.payload }
     case 'SET_ACTIVE_TOOL': return { ...state, activeTool: action.payload }

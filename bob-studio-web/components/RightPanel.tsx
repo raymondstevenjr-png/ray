@@ -28,22 +28,31 @@ export default function RightPanel() {
   const { state, dispatch } = useEditor()
   const {
     originalVideoUrl, subtitleStatus, bgStatus, greenStatus,
-    subtitlePreset, language, volume, speed,
+    language, volume, speed,
     spillSuppressionStrength, subjectIsPerson, outputCodec, errorMessage
   } = state
 
   async function handleSubtitles() {
     if (!originalVideoUrl) return
     dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'processing' })
+    dispatch({ type: 'SET_ERROR', payload: null })
     try {
       const res = await fetch('/api/subtitles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: originalVideoUrl, preset: subtitlePreset, language }),
+        body: JSON.stringify({ videoUrl: originalVideoUrl, language }),
       })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
-      dispatch({ type: 'SET_PROCESSED_URL', payload: data.videoUrl })
+      dispatch({
+        type: 'SET_TRANSCRIPT',
+        payload: {
+          text: data.transcript ?? '',
+          srt: data.srt ?? '',
+          vtt: data.vtt ?? '',
+          detectedLanguage: data.detectedLanguage ?? '',
+        },
+      })
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'done' })
     } catch (err) {
       dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'error' })
