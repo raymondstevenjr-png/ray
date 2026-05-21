@@ -6,3 +6,4 @@ out/
 .next/
 bob-studio-web/.next/
 bob-studio-mobile/.expo/
+.vercel
