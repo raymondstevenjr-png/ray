@@ -68,7 +68,7 @@ export function SubtitlesPanel() {
       dispatch({
         type: 'SET_TRANSCRIPT',
         payload: {
-          text: data.transcript ?? '',
+          text: data.subtitles ?? '',
           srt: data.srt ?? '',
           vtt: data.vtt ?? '',
           detectedLanguage: data.detectedLanguage ?? '',
