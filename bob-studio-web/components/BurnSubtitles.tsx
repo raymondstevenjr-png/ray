@@ -49,8 +49,8 @@ export default function BurnSubtitles({ videoUrl, srtContent, fileName }: Props)
         'output.mp4',
       ])
 
-      const data = await ffmpeg.readFile('output.mp4') as Uint8Array
-      const blob = new Blob([data], { type: 'video/mp4' })
+      const data = await ffmpeg.readFile('output.mp4')
+      const blob = new Blob([data as unknown as BlobPart], { type: 'video/mp4' })
       setOutputUrl(URL.createObjectURL(blob))
       setStatus('done')
     } catch (err) {
