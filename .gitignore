@@ -3,3 +3,6 @@ out/
 .DS_Store
 *.mp4
 *.mov
+.next/
+bob-studio-web/.next/
+bob-studio-mobile/.expo/
