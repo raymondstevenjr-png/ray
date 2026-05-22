@@ -1,4 +1,5 @@
 import { AssemblyAI } from 'assemblyai'
+import { rateLimit } from '../../../lib/ratelimit'
 
 export const maxDuration = 300
 
@@ -7,6 +8,8 @@ const client = new AssemblyAI({
 })
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req, 20, 10 * 60 * 1000)
+  if (limited) return limited
   try {
     let videoUrl: string | null = null
     let language = ''

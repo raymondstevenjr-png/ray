@@ -1,8 +1,11 @@
 import { fal } from "@fal-ai/client"
+import { rateLimit } from '../../../lib/ratelimit'
 
 fal.config({ credentials: process.env.FAL_KEY })
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req, 10, 10 * 60 * 1000)
+  if (limited) return limited
   try {
     const { videoUrl, spillSuppressionStrength, outputCodec } = await req.json()
     const result = await fal.subscribe("veed/video-background-removal/green-screen", {

@@ -45,7 +45,7 @@ export default function EditorScreen() {
         name: fileName,
       } as any)
 
-      const response = await fetch(`${API_BASE}/api/upload`, {
+      const response = await fetch(`${API_BASE}/api/assemblyai-upload`, {
         method: 'POST',
         body: formData,
         headers: { 'Content-Type': 'multipart/form-data' },

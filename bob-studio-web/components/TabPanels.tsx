@@ -537,11 +537,34 @@ export function BrandPanel() {
 
 export function ExportPanel() {
   const { state } = useEditor()
-  const { processedVideoUrl, originalVideoUrl, subtitleStatus } = state
+  const { processedVideoUrl, originalVideoUrl, subtitleStatus, transcriptSrt, uploadedFileName } = state
   const [format, setFormat] = useState('mp4')
   const [resolution, setResolution] = useState('1080p')
+  const [includeSubtitles, setIncludeSubtitles] = useState(true)
+  const [downloading, setDownloading] = useState(false)
 
   const url = processedVideoUrl ?? originalVideoUrl
+  const canBurnSubtitles = includeSubtitles && subtitleStatus === 'done' && !!transcriptSrt && !!url
+
+  async function handleDownload() {
+    if (!url) return
+    if (canBurnSubtitles) return // BurnSubtitles component handles it
+    setDownloading(true)
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = (uploadedFileName || 'video').replace(/\.[^.]+$/, '') + '.' + format
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } catch {
+      window.open(url)
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   const cardStyle = (active: boolean): React.CSSProperties => ({
     flex: 1,
@@ -577,8 +600,13 @@ export function ExportPanel() {
 
       {subtitleStatus === 'done' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <span style={{ fontSize: 12, color: '#666', flex: 1 }}>Include subtitles</span>
-          <input type="checkbox" defaultChecked style={{ accentColor: '#f5a623' }} />
+          <span style={{ fontSize: 12, color: '#666', flex: 1 }}>Burn subtitles into video</span>
+          <input
+            type="checkbox"
+            checked={includeSubtitles}
+            onChange={e => setIncludeSubtitles(e.target.checked)}
+            style={{ accentColor: '#f5a623' }}
+          />
         </div>
       )}
 
@@ -593,9 +621,17 @@ export function ExportPanel() {
         </div>
       </div>
 
+      {canBurnSubtitles && url && transcriptSrt && (
+        <BurnSubtitles
+          videoUrl={url}
+          srtContent={transcriptSrt}
+          fileName={uploadedFileName || 'video.mp4'}
+        />
+      )}
+
       <button
-        onClick={() => url && window.open(url)}
-        disabled={!url}
+        onClick={handleDownload}
+        disabled={!url || downloading || canBurnSubtitles}
         style={{
           background: '#f5a623', color: '#0e0e0f', fontWeight: 600,
           width: '100%', padding: '12px', borderRadius: 6,
