@@ -68,8 +68,11 @@ export function SubtitlesPanel() {
       let res: Response
       const isBlobUrl = originalVideoUrl?.startsWith('blob:')
 
-      if (isBlobUrl && uploadedFile) {
-        // fal.ai upload failed — send the file directly to be uploaded by AssemblyAI
+      if (isBlobUrl || !originalVideoUrl) {
+        // Background upload hasn't finished or failed — send the file directly
+        if (!uploadedFile) {
+          throw new Error('Video is not ready yet. Please re-select your video and wait for the upload to complete.')
+        }
         const formData = new FormData()
         formData.append('file', uploadedFile)
         formData.append('language', language)
