@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { useEditor } from '../context/EditorContext'
 import { IconSparkles, IconLayersDifference, IconLayersLinked } from '@tabler/icons-react'
 
@@ -27,21 +28,31 @@ function Spinner() {
 export default function RightPanel() {
   const { state, dispatch } = useEditor()
   const {
-    originalVideoUrl, subtitleStatus, bgStatus, greenStatus,
+    originalVideoUrl, uploadedFile, subtitleStatus, bgStatus, greenStatus,
     language, volume, speed,
-    spillSuppressionStrength, subjectIsPerson, outputCodec, errorMessage
+    spillSuppressionStrength, subjectIsPerson, outputCodec,
   } = state
 
+  const isUploadReady = !!originalVideoUrl && !originalVideoUrl.startsWith('blob:')
+
   async function handleSubtitles() {
-    if (!originalVideoUrl) return
+    if (!isUploadReady && !uploadedFile) return
     dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'processing' })
     dispatch({ type: 'SET_ERROR', payload: null })
     try {
-      const res = await fetch('/api/subtitles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: originalVideoUrl, language }),
-      })
+      let res: Response
+      if (!isUploadReady && uploadedFile) {
+        const formData = new FormData()
+        formData.append('file', uploadedFile)
+        formData.append('language', language)
+        res = await fetch('/api/subtitles', { method: 'POST', body: formData })
+      } else {
+        res = await fetch('/api/subtitles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: originalVideoUrl, language }),
+        })
+      }
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       dispatch({
@@ -61,8 +72,12 @@ export default function RightPanel() {
   }
 
   async function handleRemoveBg() {
-    if (!originalVideoUrl) return
+    if (!isUploadReady) {
+      dispatch({ type: 'SET_ERROR', payload: 'Video is still uploading — wait a moment and try again.' })
+      return
+    }
     dispatch({ type: 'SET_BG_STATUS', payload: 'processing' })
+    dispatch({ type: 'SET_ERROR', payload: null })
     try {
       const res = await fetch('/api/remove-background', {
         method: 'POST',
@@ -80,8 +95,12 @@ export default function RightPanel() {
   }
 
   async function handleGreenScreen() {
-    if (!originalVideoUrl) return
+    if (!isUploadReady) {
+      dispatch({ type: 'SET_ERROR', payload: 'Video is still uploading — wait a moment and try again.' })
+      return
+    }
     dispatch({ type: 'SET_GREEN_STATUS', payload: 'processing' })
+    dispatch({ type: 'SET_ERROR', payload: null })
     try {
       const res = await fetch('/api/green-screen', {
         method: 'POST',
@@ -143,9 +162,9 @@ export default function RightPanel() {
     cursor: 'not-allowed',
   }
 
-  const subtitleDisabled = !originalVideoUrl || subtitleStatus === 'uploading' || subtitleStatus === 'processing'
-  const bgDisabled = !originalVideoUrl || bgStatus === 'processing'
-  const greenDisabled = !originalVideoUrl || greenStatus === 'processing'
+  const subtitleDisabled = (!isUploadReady && !uploadedFile) || subtitleStatus === 'uploading' || subtitleStatus === 'processing'
+  const bgDisabled = !isUploadReady || bgStatus === 'processing'
+  const greenDisabled = !isUploadReady || greenStatus === 'processing'
 
   return (
     <div style={{
@@ -157,7 +176,6 @@ export default function RightPanel() {
     }}>
       <div style={sectionTitle}>AI Actions</div>
       <div style={{ padding: '0 10px' }}>
-        {/* Auto-subtitle */}
         <button
           onClick={handleSubtitles}
           disabled={subtitleDisabled}
@@ -167,7 +185,6 @@ export default function RightPanel() {
           {getSubtitleLabel()}
         </button>
 
-        {/* Remove BG */}
         <button
           onClick={handleRemoveBg}
           disabled={bgDisabled}
@@ -177,7 +194,6 @@ export default function RightPanel() {
           {getBgLabel()}
         </button>
 
-        {/* Green Screen */}
         <button
           onClick={handleGreenScreen}
           disabled={greenDisabled}
@@ -187,7 +203,6 @@ export default function RightPanel() {
           {getGreenLabel()}
         </button>
 
-        {/* Spill suppression */}
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span style={{ fontSize: 11, color: '#666' }}>Spill strength</span>
@@ -205,7 +220,6 @@ export default function RightPanel() {
           </p>
         </div>
 
-        {/* Subject toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ fontSize: 11, color: '#666' }}>Subject is a person</span>
           <input

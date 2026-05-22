@@ -16,13 +16,21 @@ export default function TopBar() {
   const { state, dispatch } = useEditor()
   const { activeTab, processedVideoUrl, originalVideoUrl, uploadedFileName } = state
 
-  function handleExport() {
+  async function handleExport() {
     const url = processedVideoUrl ?? originalVideoUrl
-    if (!url) return
-    const a = document.createElement('a')
-    a.href = url
-    a.download = uploadedFileName || 'bob-studio-export.mp4'
-    a.click()
+    if (!url || url.startsWith('blob:')) return
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = uploadedFileName || 'bob-studio-export.mp4'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } catch {
+      window.open(url)
+    }
   }
 
   return (

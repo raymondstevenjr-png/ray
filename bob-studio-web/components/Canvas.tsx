@@ -30,6 +30,8 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
   const [subtitlesOn, setSubtitlesOn] = useState(true)
   const [vttBlobUrl, setVttBlobUrl] = useState<string | null>(null)
 
+  const { speed, volume } = state
+
   // Build a blob URL from the VTT string whenever it changes
   useEffect(() => {
     if (!transcriptVtt) { setVttBlobUrl(null); return }
@@ -38,6 +40,15 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
     setVttBlobUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [transcriptVtt])
+
+  // Sync speed and volume to video element when they change in state
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = speed
+  }, [speed])
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.volume = volume / 100
+  }, [volume])
 
   // Show/hide subtitle track on the video element
   useEffect(() => {
@@ -52,15 +63,13 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
     || bgStatus === 'uploading' || bgStatus === 'processing'
     || greenStatus === 'uploading' || greenStatus === 'processing'
 
-  const anyDone = subtitleStatus === 'done' || bgStatus === 'done' || greenStatus === 'done'
   const anyError = subtitleStatus === 'error' || bgStatus === 'error' || greenStatus === 'error'
 
   function getOverlayMessage() {
-    if (subtitleStatus === 'uploading') return { text: 'Uploading to fal storage...', color: '#e8e6e0' }
+    if (subtitleStatus === 'uploading') return { text: 'Uploading video...', color: '#e8e6e0' }
     if (subtitleStatus === 'processing') return { text: 'Transcribing with AssemblyAI...', color: '#e8e6e0' }
     if (bgStatus === 'processing') return { text: 'Removing background...', color: '#e8e6e0' }
     if (greenStatus === 'processing') return { text: 'Processing green screen...', color: '#e8e6e0' }
-    if (anyDone) return { text: 'Done! Ready to download.', color: '#5ec488' }
     if (anyError) return { text: errorMessage || 'Processing failed.', color: '#e24b4a' }
     return null
   }
@@ -101,7 +110,7 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
   }
 
   const overlayMsg = getOverlayMessage()
-  const showOverlay = anyProcessing || anyDone || anyError
+  const showOverlay = anyProcessing || anyError
 
   const selectStyle: React.CSSProperties = {
     background: '#1a1a1c',
