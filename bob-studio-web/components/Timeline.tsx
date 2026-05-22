@@ -41,7 +41,7 @@ export default function Timeline() {
       const delta = e.clientX - dragStartX
       const clip = clips.find(c => c.id === draggingId)
       if (!clip) return
-      const newStart = Math.max(0, dragStartClipX + delta)
+      const newStart = Math.max(0, dragStartClipX + delta / zoomLevel)
       dispatch({ type: 'UPDATE_CLIP', payload: { ...clip, start: newStart } })
     }
     function onMouseUp() {
@@ -67,18 +67,20 @@ export default function Timeline() {
     if (!selectedClipId) return
     const clip = clips.find(c => c.id === selectedClipId)
     if (!clip) return
-    if (playheadPx <= clip.start || playheadPx >= clip.start + clip.width) return
+    // playheadPx is in scaled pixels; convert to unscaled timeline units for split math
+    const playheadUnits = playheadPx / zoomLevel
+    if (playheadUnits <= clip.start || playheadUnits >= clip.start + clip.width) return
 
     const clipA: Clip = {
       ...clip,
       id: clip.id + '_a',
-      width: playheadPx - clip.start - 2,
+      width: playheadUnits - clip.start - 2,
     }
     const clipB: Clip = {
       ...clip,
       id: clip.id + '_b',
-      start: playheadPx + 2,
-      width: clip.start + clip.width - playheadPx - 2,
+      start: playheadUnits + 2,
+      width: clip.start + clip.width - playheadUnits - 2,
     }
 
     const newClips = clips.filter(c => c.id !== selectedClipId).concat([clipA, clipB])

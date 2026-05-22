@@ -22,6 +22,8 @@ export default function EditorScreen() {
   const [localVideoUri, setLocalVideoUri] = useState<string | null>(params.videoUri ?? null)
   const [uploadedFalUrl, setUploadedFalUrl] = useState<string | null>(null)
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(null)
+  const [subtitleSrt, setSubtitleSrt] = useState<string | null>(null)
+  const [subtitleVtt, setSubtitleVtt] = useState<string | null>(null)
   const [subtitleStatus, setSubtitleStatus] = useState<ProcessStatus>('idle')
   const [bgStatus, setBgStatus] = useState<ProcessStatus>('idle')
   const [preset, setPreset] = useState('glass')
@@ -70,7 +72,8 @@ export default function EditorScreen() {
       })
       const data = await response.json()
       if (data.error) throw new Error(data.error)
-      setProcessedVideoUrl(data.videoUrl)
+      setSubtitleSrt(data.srt ?? null)
+      setSubtitleVtt(data.vtt ?? null)
       setSubtitleStatus('done')
     } catch (err) {
       setSubtitleStatus('error')
@@ -103,6 +106,18 @@ export default function EditorScreen() {
     }
   }
 
+  async function downloadSubtitles(format: 'srt' | 'vtt') {
+    const content = format === 'srt' ? subtitleSrt : subtitleVtt
+    if (!content) return
+    try {
+      const localUri = FileSystem.documentDirectory + fileName.replace(/\.[^.]+$/, '') + '.' + format
+      await FileSystem.writeAsStringAsync(localUri, content, { encoding: FileSystem.EncodingType.UTF8 })
+      await Sharing.shareAsync(localUri)
+    } catch {
+      Alert.alert('Error', 'Could not save subtitle file.')
+    }
+  }
+
   async function downloadAndShare() {
     if (!processedVideoUrl) return
     try {
@@ -124,6 +139,8 @@ export default function EditorScreen() {
       setLocalVideoUri(result.assets[0].uri)
       setUploadedFalUrl(null)
       setProcessedVideoUrl(null)
+      setSubtitleSrt(null)
+      setSubtitleVtt(null)
       setSubtitleStatus('idle')
       setBgStatus('idle')
     }
@@ -270,6 +287,27 @@ export default function EditorScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Subtitle results card */}
+      {subtitleStatus === 'done' && (subtitleSrt || subtitleVtt) && (
+        <View style={[cardStyle.card, { borderColor: '#2a5540' }]}>
+          <Text style={[styles.cardTitle, { color: colors.success }]}>SUBTITLES READY</Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {subtitleSrt && (
+              <TouchableOpacity style={styles.downloadButton} onPress={() => downloadSubtitles('srt')}>
+                <Ionicons name="download-outline" size={16} color={colors.success} />
+                <Text style={styles.downloadText}>Download SRT</Text>
+              </TouchableOpacity>
+            )}
+            {subtitleVtt && (
+              <TouchableOpacity style={styles.downloadButton} onPress={() => downloadSubtitles('vtt')}>
+                <Ionicons name="download-outline" size={16} color={colors.success} />
+                <Text style={styles.downloadText}>Download VTT</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
 
       {/* Results card */}
       {processedVideoUrl && (
