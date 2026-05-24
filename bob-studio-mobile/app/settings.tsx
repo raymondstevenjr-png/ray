@@ -1,29 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity,
-  TextInput, StyleSheet, Alert,
+  TextInput, StyleSheet,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../constants/colors'
 import { API_BASE } from '../constants/api'
+import { getSavedApiUrl, saveApiUrl } from '../constants/storage'
 
 export default function SettingsScreen() {
   const [apiBase, setApiBase] = useState(API_BASE)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'ok' | 'error'>('idle')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    getSavedApiUrl().then(url => { if (url) setApiBase(url) })
+  }, [])
 
   async function testConnection() {
     setConnectionStatus('idle')
     try {
       const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(5000) })
       const data = await res.json()
-      if (data.status === 'ok') {
-        setConnectionStatus('ok')
-      } else {
-        setConnectionStatus('error')
-      }
+      setConnectionStatus(data.status === 'ok' ? 'ok' : 'error')
     } catch {
       setConnectionStatus('error')
     }
+  }
+
+  async function handleSaveUrl() {
+    await saveApiUrl(apiBase)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   return (
@@ -46,12 +54,13 @@ export default function SettingsScreen() {
         />
 
         <View style={styles.testRow}>
-          <TouchableOpacity
-            style={styles.testButton}
-            onPress={testConnection}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.testButtonText}>Test Connection</Text>
+          <TouchableOpacity style={styles.testButton} onPress={testConnection} activeOpacity={0.8}>
+            <Text style={styles.testButtonText}>Test</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.testButton, { borderColor: colors.accent }]} onPress={handleSaveUrl} activeOpacity={0.8}>
+            <Text style={[styles.testButtonText, { color: saved ? colors.success : colors.accent }]}>
+              {saved ? '✓ Saved' : 'Save URL'}
+            </Text>
           </TouchableOpacity>
 
           {connectionStatus === 'ok' && (
@@ -80,9 +89,11 @@ export default function SettingsScreen() {
 
       {/* Credits card */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>CREDITS</Text>
-        <Text style={styles.creditLine}>Powered by VEED AI via fal.ai</Text>
-        <Text style={styles.creditDesc}>Subtitles, background removal, green screen</Text>
+        <Text style={styles.cardTitle}>POWERED BY</Text>
+        <Text style={styles.creditLine}>AssemblyAI Universal-3 Pro</Text>
+        <Text style={styles.creditDesc}>Transcription, speaker diarization, subtitles</Text>
+        <Text style={[styles.creditLine, { marginTop: 10 }]}>VEED AI via fal.ai</Text>
+        <Text style={styles.creditDesc}>Background removal, green screen</Text>
       </View>
     </ScrollView>
   )

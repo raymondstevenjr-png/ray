@@ -224,6 +224,23 @@ export default function Canvas({ onFileSelect }: { onFileSelect: (file: File) =>
                 {overlayMsg.text}
               </span>
             )}
+            {anyError && (
+              <button
+                onClick={() => {
+                  dispatch({ type: 'SET_ERROR', payload: null })
+                  dispatch({ type: 'SET_SUBTITLE_STATUS', payload: 'idle' })
+                  dispatch({ type: 'SET_BG_STATUS', payload: 'idle' })
+                  dispatch({ type: 'SET_GREEN_STATUS', payload: 'idle' })
+                }}
+                style={{
+                  background: 'transparent', border: '0.5px solid #444', borderRadius: 4,
+                  color: '#888', fontSize: 11, padding: '4px 12px', cursor: 'pointer',
+                  fontFamily: 'DM Sans, sans-serif',
+                }}
+              >
+                Dismiss
+              </button>
+            )}
           </div>
         )}
       </div>

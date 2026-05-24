@@ -10,6 +10,7 @@ import * as Sharing from 'expo-sharing'
 import { useLocalSearchParams } from 'expo-router'
 import { colors } from '../constants/colors'
 import { API_BASE } from '../constants/api'
+import { saveClip } from '../constants/storage'
 
 type ProcessStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
 type BgMode = 'auto' | 'green'
@@ -75,6 +76,15 @@ export default function EditorScreen() {
       setSubtitleSrt(data.srt ?? null)
       setSubtitleVtt(data.vtt ?? null)
       setSubtitleStatus('done')
+      saveClip({
+        id: Date.now().toString(),
+        fileName,
+        processedAt: new Date().toISOString(),
+        type: 'subtitle',
+        originalUrl: uploadedFalUrl,
+        srt: data.srt ?? undefined,
+        vtt: data.vtt ?? undefined,
+      })
     } catch (err) {
       setSubtitleStatus('error')
       setErrorMessage((err as Error).message)
@@ -100,6 +110,14 @@ export default function EditorScreen() {
       if (data.error) throw new Error(data.error)
       setProcessedVideoUrl(data.primaryUrl)
       setBgStatus('done')
+      saveClip({
+        id: Date.now().toString(),
+        fileName,
+        processedAt: new Date().toISOString(),
+        type: bgMode === 'auto' ? 'background' : 'green-screen',
+        originalUrl: uploadedFalUrl,
+        processedUrl: data.primaryUrl,
+      })
     } catch (err) {
       setBgStatus('error')
       setErrorMessage((err as Error).message)
