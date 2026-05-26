@@ -6,6 +6,7 @@ import type { ActiveTab } from '../types/editor'
 const tabs: { id: ActiveTab; label: string }[] = [
   { id: 'edit', label: 'Edit' },
   { id: 'subtitles', label: 'Subtitles' },
+  { id: 'clips', label: 'Clips' },
   { id: 'background', label: 'Background' },
   { id: 'greenscreen', label: 'Green Screen' },
   { id: 'brand', label: 'Brand' },

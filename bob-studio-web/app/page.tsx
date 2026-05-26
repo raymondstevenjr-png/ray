@@ -7,7 +7,7 @@ import LeftPanel from '../components/LeftPanel'
 import Canvas from '../components/Canvas'
 import RightPanel from '../components/RightPanel'
 import Timeline from '../components/Timeline'
-import { SubtitlesPanel, BackgroundPanel, BrandPanel, ExportPanel } from '../components/TabPanels'
+import { SubtitlesPanel, BackgroundPanel, BrandPanel, ExportPanel, ClipsPanel } from '../components/TabPanels'
 
 function EditorLayout() {
   const { state, dispatch } = useEditor()
@@ -54,6 +54,7 @@ function EditorLayout() {
             {showTabPanel ? (
               <div style={{ flex: 1, overflowY: 'auto', background: '#0e0e0f' }}>
                 {activeTab === 'subtitles' && <SubtitlesPanel />}
+                {activeTab === 'clips' && <ClipsPanel />}
                 {activeTab === 'background' && <BackgroundPanel />}
                 {activeTab === 'greenscreen' && <BackgroundPanel />}
                 {activeTab === 'brand' && <BrandPanel />}

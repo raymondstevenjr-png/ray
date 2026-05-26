@@ -1,26 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity,
   TextInput, StyleSheet,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../constants/colors'
-import { API_BASE } from '../constants/api'
-import { getSavedApiUrl, saveApiUrl } from '../constants/storage'
+import { useApiBase } from '../context/ApiContext'
 
 export default function SettingsScreen() {
-  const [apiBase, setApiBase] = useState(API_BASE)
+  const { apiBase, setApiBase: saveApiBase } = useApiBase()
+  const [draft, setDraft] = useState(apiBase)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'ok' | 'error'>('idle')
   const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    getSavedApiUrl().then(url => { if (url) setApiBase(url) })
-  }, [])
 
   async function testConnection() {
     setConnectionStatus('idle')
     try {
-      const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(5000) })
+      const res = await fetch(`${draft}/api/health`, { signal: AbortSignal.timeout(5000) })
       const data = await res.json()
       setConnectionStatus(data.status === 'ok' ? 'ok' : 'error')
     } catch {
@@ -29,7 +25,7 @@ export default function SettingsScreen() {
   }
 
   async function handleSaveUrl() {
-    await saveApiUrl(apiBase)
+    await saveApiBase(draft)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -45,8 +41,8 @@ export default function SettingsScreen() {
         <Text style={styles.label}>Backend URL</Text>
         <TextInput
           style={styles.input}
-          value={apiBase}
-          onChangeText={setApiBase}
+          value={draft}
+          onChangeText={setDraft}
           placeholder="http://localhost:3000"
           placeholderTextColor="#444"
           autoCapitalize="none"

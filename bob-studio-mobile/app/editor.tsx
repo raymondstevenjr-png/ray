@@ -9,7 +9,7 @@ import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import { useLocalSearchParams } from 'expo-router'
 import { colors } from '../constants/colors'
-import { API_BASE } from '../constants/api'
+import { useApiBase } from '../context/ApiContext'
 import { saveClip } from '../constants/storage'
 
 type ProcessStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
@@ -18,6 +18,7 @@ type BgMode = 'auto' | 'green'
 const PRESET_CHIPS = ['glass', 'whisper', 'simple', 'hustle', 'rizz', 'vegas', 'beans', 'corpo', 'plain']
 
 export default function EditorScreen() {
+  const { apiBase } = useApiBase()
   const params = useLocalSearchParams<{ videoUri?: string; fileName?: string }>()
 
   const [localVideoUri, setLocalVideoUri] = useState<string | null>(params.videoUri ?? null)
@@ -46,7 +47,7 @@ export default function EditorScreen() {
         name: fileName,
       } as any)
 
-      const response = await fetch(`${API_BASE}/api/assemblyai-upload`, {
+      const response = await fetch(`${apiBase}/api/assemblyai-upload`, {
         method: 'POST',
         body: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -66,7 +67,7 @@ export default function EditorScreen() {
     setSubtitleStatus('processing')
     setErrorMessage(null)
     try {
-      const response = await fetch(`${API_BASE}/api/subtitles`, {
+      const response = await fetch(`${apiBase}/api/subtitles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoUrl: uploadedFalUrl, preset, language }),
@@ -101,7 +102,7 @@ export default function EditorScreen() {
         ? { videoUrl: uploadedFalUrl, subjectIsPerson: true, outputCodec: 'h264' }
         : { videoUrl: uploadedFalUrl, spillSuppressionStrength: spillStrength, outputCodec: 'vp9' }
 
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      const response = await fetch(`${apiBase}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

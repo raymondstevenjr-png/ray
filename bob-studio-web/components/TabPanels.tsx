@@ -535,6 +535,121 @@ export function BrandPanel() {
   )
 }
 
+export function ClipsPanel() {
+  const { state } = useEditor()
+  const { processedVideoUrl, originalVideoUrl, transcriptSrt, transcriptVtt, uploadedFileName, subtitleStatus, bgStatus, greenStatus } = state
+
+  const hasProcessed = processedVideoUrl || (subtitleStatus === 'done' && transcriptSrt)
+
+  async function downloadFile(url: string, name: string) {
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } catch {
+      window.open(url)
+    }
+  }
+
+  const base = (uploadedFileName || 'video').replace(/\.[^.]+$/, '')
+
+  return (
+    <div style={{ padding: 24, maxWidth: 560, margin: '0 auto' }}>
+      <p style={{ fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>
+        Processed outputs
+      </p>
+
+      {!hasProcessed ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: '#333' }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>🎬</div>
+          <p style={{ fontSize: 13 }}>No outputs yet — run Auto-subtitle or Background Removal first</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {processedVideoUrl && (bgStatus === 'done' || greenStatus === 'done') && (
+            <div style={{
+              background: '#141415', borderRadius: 10, border: '0.5px solid #242426', padding: 16,
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8, background: '#1e3a2a',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0,
+              }}>✂</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, color: '#e8e6e0', fontWeight: 500 }}>{base}_processed.mp4</div>
+                <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
+                  {bgStatus === 'done' ? 'Background removed' : 'Green screen processed'}
+                </div>
+              </div>
+              <button
+                onClick={() => downloadFile(processedVideoUrl, base + '_processed.mp4')}
+                style={{
+                  background: '#1a3a2a', color: '#5ec488', border: '0.5px solid #2a5540',
+                  borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer',
+                  fontFamily: 'DM Sans, sans-serif',
+                }}
+              >↓ Download</button>
+            </div>
+          )}
+
+          {subtitleStatus === 'done' && transcriptSrt && (
+            <div style={{
+              background: '#141415', borderRadius: 10, border: '0.5px solid #242426', padding: 16,
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8, background: '#2c2200',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0,
+              }}>✦</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, color: '#e8e6e0', fontWeight: 500 }}>{base}.srt</div>
+                <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>AssemblyAI transcript</div>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => {
+                    const blob = new Blob([transcriptSrt], { type: 'text/plain' })
+                    const a = document.createElement('a')
+                    a.href = URL.createObjectURL(blob)
+                    a.download = base + '.srt'
+                    a.click()
+                  }}
+                  style={{
+                    background: '#2c2200', color: '#f5a623', border: '0.5px solid #5a3a0a',
+                    borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer',
+                    fontFamily: 'DM Sans, sans-serif',
+                  }}
+                >↓ SRT</button>
+                {transcriptVtt && (
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([transcriptVtt], { type: 'text/vtt' })
+                      const a = document.createElement('a')
+                      a.href = URL.createObjectURL(blob)
+                      a.download = base + '.vtt'
+                      a.click()
+                    }}
+                    style={{
+                      background: '#2c2200', color: '#f5a623', border: '0.5px solid #5a3a0a',
+                      borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer',
+                      fontFamily: 'DM Sans, sans-serif',
+                    }}
+                  >↓ VTT</button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function ExportPanel() {
   const { state } = useEditor()
   const { processedVideoUrl, originalVideoUrl, subtitleStatus, transcriptSrt, uploadedFileName } = state
