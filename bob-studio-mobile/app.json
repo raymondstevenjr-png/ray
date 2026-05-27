@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Bob Studio",
+    "slug": "bob-studio-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0e0e0f"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0e0e0f"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Bob Studio needs access to your photos to upload videos."
+        }
+      ]
+    ],
+    "scheme": "bob-studio"
+  }
+}
