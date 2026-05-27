@@ -16,6 +16,7 @@ export function rateLimit(
   const entry = cache.get(ip)
 
   if (!entry || now > entry.resetAt) {
+    if (entry) cache.delete(ip)
     cache.set(ip, { count: 1, resetAt: now + windowMs })
     return null
   }

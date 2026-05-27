@@ -78,7 +78,7 @@ export default function EditorScreen() {
       setSubtitleVtt(data.vtt ?? null)
       setSubtitleStatus('done')
       saveClip({
-        id: Date.now().toString(),
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         fileName,
         processedAt: new Date().toISOString(),
         type: 'subtitle',
@@ -112,7 +112,7 @@ export default function EditorScreen() {
       setProcessedVideoUrl(data.primaryUrl)
       setBgStatus('done')
       saveClip({
-        id: Date.now().toString(),
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         fileName,
         processedAt: new Date().toISOString(),
         type: bgMode === 'auto' ? 'background' : 'green-screen',

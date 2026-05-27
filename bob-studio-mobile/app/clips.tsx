@@ -9,17 +9,7 @@ import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import { colors } from '../constants/colors'
 import { getClips, deleteClip, type ClipEntry } from '../constants/storage'
-
-const TYPE_LABEL: Record<ClipEntry['type'], string> = {
-  subtitle: 'Subtitles',
-  background: 'BG Removed',
-  'green-screen': 'Green Screen',
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso)
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
+import { TYPE_LABEL, formatDate } from '../constants/clipUtils'
 
 export default function ClipsScreen() {
   const [clips, setClips] = useState<ClipEntry[]>([])
@@ -35,7 +25,7 @@ export default function ClipsScreen() {
   async function handleShare(clip: ClipEntry) {
     if (clip.processedUrl) {
       try {
-        const localUri = FileSystem.documentDirectory + clip.fileName
+        const localUri = `${FileSystem.documentDirectory}${clip.fileName}`
         await FileSystem.downloadAsync(clip.processedUrl, localUri)
         await Sharing.shareAsync(localUri)
       } catch {
@@ -43,7 +33,7 @@ export default function ClipsScreen() {
       }
     } else if (clip.srt) {
       try {
-        const localUri = FileSystem.documentDirectory + clip.fileName.replace(/\.[^.]+$/, '') + '.srt'
+        const localUri = `${FileSystem.documentDirectory}${clip.fileName.replace(/\.[^.]+$/, '')}.srt`
         await FileSystem.writeAsStringAsync(localUri, clip.srt, { encoding: FileSystem.EncodingType.UTF8 })
         await Sharing.shareAsync(localUri)
       } catch {

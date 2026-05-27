@@ -23,12 +23,17 @@ export async function getClips(): Promise<ClipEntry[]> {
   }
 }
 
-export async function saveClip(entry: ClipEntry): Promise<void> {
-  try {
-    const existing = await getClips()
-    const updated = [entry, ...existing].slice(0, 50) // keep last 50
-    await AsyncStorage.setItem(CLIPS_KEY, JSON.stringify(updated))
-  } catch {}
+// Serialise writes so concurrent calls never race on the shared array
+let saveQueue = Promise.resolve()
+
+export function saveClip(entry: ClipEntry): void {
+  saveQueue = saveQueue
+    .then(async () => {
+      const existing = await getClips()
+      const updated = [entry, ...existing].slice(0, 50)
+      await AsyncStorage.setItem(CLIPS_KEY, JSON.stringify(updated))
+    })
+    .catch(() => {})
 }
 
 export async function deleteClip(id: string): Promise<void> {

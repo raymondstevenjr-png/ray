@@ -614,10 +614,14 @@ export function ClipsPanel() {
                 <button
                   onClick={() => {
                     const blob = new Blob([transcriptSrt], { type: 'text/plain' })
+                    const href = URL.createObjectURL(blob)
                     const a = document.createElement('a')
-                    a.href = URL.createObjectURL(blob)
+                    a.href = href
                     a.download = base + '.srt'
+                    document.body.appendChild(a)
                     a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(href)
                   }}
                   style={{
                     background: '#2c2200', color: '#f5a623', border: '0.5px solid #5a3a0a',
@@ -629,10 +633,14 @@ export function ClipsPanel() {
                   <button
                     onClick={() => {
                       const blob = new Blob([transcriptVtt], { type: 'text/vtt' })
+                      const href = URL.createObjectURL(blob)
                       const a = document.createElement('a')
-                      a.href = URL.createObjectURL(blob)
+                      a.href = href
                       a.download = base + '.vtt'
+                      document.body.appendChild(a)
                       a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(href)
                     }}
                     style={{
                       background: '#2c2200', color: '#f5a623', border: '0.5px solid #5a3a0a',

@@ -7,13 +7,8 @@ import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { router, useFocusEffect } from 'expo-router'
 import { colors } from '../constants/colors'
-import { getClips, type ClipEntry } from '../constants/storage'
-
-const TYPE_LABEL: Record<ClipEntry['type'], string> = {
-  subtitle: 'Subtitles',
-  background: 'BG Removed',
-  'green-screen': 'Green Screen',
-}
+import { getClips } from '../constants/storage'
+import { TYPE_LABEL, formatDate } from '../constants/clipUtils'
 
 const quickActions = [
   { id: 'subtitle', icon: 'sparkles-outline' as const, label: 'Auto-subtitle', desc: 'Burn captions into video', active: true },
@@ -21,11 +16,6 @@ const quickActions = [
   { id: 'greenscreen', icon: 'color-filter-outline' as const, label: 'Green Screen', desc: 'Chromakey processing', active: true },
   { id: 'voice', icon: 'mic-outline' as const, label: 'Voice Clone', desc: 'Coming soon', active: false },
 ]
-
-function formatDate(iso: string) {
-  const d = new Date(iso)
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
 
 export default function HomeScreen() {
   const [recentClips, setRecentClips] = useState<ClipEntry[]>([])

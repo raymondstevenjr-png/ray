@@ -51,6 +51,7 @@ export async function POST(req: Request) {
       vtt: await client.transcripts.subtitles(transcript.id, 'vtt'),
       words: transcript.words,
       utterances: transcript.utterances ?? [],
+      detectedLanguage: transcript.language_code ?? '',
     })
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
