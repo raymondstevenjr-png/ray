@@ -3,7 +3,7 @@ import json
 CYAN = "#00B0F0"; NAVY = "#0A2540"; LIGHT = "#F7F9FB"; WHITE = "#FFFFFF"
 FONT = "DM Sans"; SLATE = "#4A5C70"; NEAR_BLACK = "#0F1E2D"
 
-FB_URL = "https://www.facebook.com/Rayfoundationsl"
+FB_URL = "https://www.facebook.com/profile.php?id=100090834922470"
 IG_URL = "https://www.instagram.com/ray.foundation/"
 LI_URL = "https://www.linkedin.com/company/ray-foundation/"
 
