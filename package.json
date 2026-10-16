@@ -1,7 +1,7 @@
 {
   "name": "slppna-debate-intro",
   "version": "1.0.0",
-  "description": "SLPPNA Young Generation Retreat \u2014 Debate Intro Video",
+  "description": "SLPPNA Young Generation Retreat — Debate Intro Video",
   "scripts": {
     "start": "remotion studio",
     "build": "remotion render DebateIntro out/DebateIntro.mp4",
