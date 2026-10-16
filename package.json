@@ -5,7 +5,8 @@
   "scripts": {
     "start": "remotion studio",
     "build": "remotion render DebateIntro out/DebateIntro.mp4",
-    "render": "remotion render DebateIntro out/DebateIntro.mp4"
+    "render": "remotion render DebateIntro out/DebateIntro.mp4",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.0",
